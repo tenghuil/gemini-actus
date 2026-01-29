@@ -14,7 +14,7 @@ import {
   openBrowserSecurely,
   shouldLaunchBrowser,
   type ValidationIntent,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { useKeypress } from '../hooks/useKeypress.js';
 import { keyMatchers, Command } from '../keyMatchers.js';
 

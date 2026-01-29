@@ -18,6 +18,9 @@ import type { MessageBus } from '../confirmation-bus/message-bus.js';
 import type { AgentDefinition, AgentInputs } from './types.js';
 import { SubagentToolWrapper } from './subagent-tool-wrapper.js';
 import { SchemaValidator } from '../utils/schemaValidator.js';
+import { subagentRegistry } from './subagent-registry.js';
+// import { debugLogger } from '../utils/debugLogger.js';
+import { v4 as uuidv4 } from 'uuid';
 
 export class SubagentTool extends BaseDeclarativeTool<AgentInputs, ToolResult> {
   constructor(
@@ -65,6 +68,8 @@ export class SubagentTool extends BaseDeclarativeTool<AgentInputs, ToolResult> {
 }
 
 class SubAgentInvocation extends BaseToolInvocation<AgentInputs, ToolResult> {
+  private runId: string;
+
   constructor(
     params: AgentInputs,
     private readonly definition: AgentDefinition,
@@ -79,10 +84,11 @@ class SubAgentInvocation extends BaseToolInvocation<AgentInputs, ToolResult> {
       _toolName ?? definition.name,
       _toolDisplayName ?? definition.displayName ?? definition.name,
     );
+    this.runId = uuidv4();
   }
 
   getDescription(): string {
-    return `Delegating to agent '${this.definition.name}'`;
+    return `Delegating to agent '${this.definition.displayName ?? this.definition.name}'`;
   }
 
   override async shouldConfirmExecute(
@@ -112,9 +118,45 @@ class SubAgentInvocation extends BaseToolInvocation<AgentInputs, ToolResult> {
       );
     }
 
+    // Register run start
+    try {
+      await subagentRegistry.registerRun({
+        runId: this.runId,
+        childSessionKey: `subagent:${this.runId}`, // Virtual session key for now
+        requesterSessionKey: 'main', // TODO: Pass actual session key
+        requesterDisplayKey: 'Main',
+        task: this.definition.name, // Using agent name as task for now
+        cleanup: 'keep',
+        createdAt: Date.now(),
+        startedAt: Date.now(),
+      });
+    } catch (_e) {
+      // Log but continue if registry fails
+      // debugLogger.error('Failed to register subagent run:', e);
+    }
+
     const invocation = this.buildSubInvocation(this.definition, this.params);
 
-    return invocation.execute(signal, updateOutput);
+    try {
+      const result = await invocation.execute(signal, updateOutput);
+
+      // Update run success
+      await subagentRegistry.updateRun(this.runId, {
+        endedAt: Date.now(),
+        outcome: { status: 'ok' },
+      });
+
+      return result;
+    } catch (error: unknown) {
+      // Update run failure
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      await subagentRegistry.updateRun(this.runId, {
+        endedAt: Date.now(),
+        outcome: { status: 'error', error: errorMessage },
+      });
+      throw error;
+    }
   }
 
   private buildSubInvocation(

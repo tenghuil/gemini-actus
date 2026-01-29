@@ -12,7 +12,7 @@ import { waitFor } from '../../test-utils/async.js';
 import type {
   ConversationRecord,
   MessageRecord,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 
 vi.mock('../utils/formatters.js', async (importOriginal) => {
   const original =
@@ -23,9 +23,9 @@ vi.mock('../utils/formatters.js', async (importOriginal) => {
   };
 });
 
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
+vi.mock('@google/gemini-actus-core', async (importOriginal) => {
   const original =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+    await importOriginal<typeof import('@google/gemini-actus-core')>();
 
   const partToStringRecursive = (part: unknown): string => {
     if (!part) {

@@ -10,11 +10,11 @@ import {
   type Config,
   ValidationRequiredError,
   AuthType,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
+vi.mock('@google/gemini-actus-core', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+    await importOriginal<typeof import('@google/gemini-actus-core')>();
   return {
     ...actual,
     getErrorMessage: (e: unknown) => (e as Error).message,

@@ -23,9 +23,9 @@ vi.mock('os', async (importOriginal) => {
   };
 });
 
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
+vi.mock('@google/gemini-actus-core', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+    await importOriginal<typeof import('@google/gemini-actus-core')>();
   return {
     ...actual,
     homedir: () => os.homedir(),
@@ -63,7 +63,7 @@ describe('getUserStartupWarnings', () => {
       const warnings = await getUserStartupWarnings({}, homeDir);
       expect(warnings).toContainEqual(
         expect.stringContaining(
-          'Warning you are running Gemini CLI in your home directory',
+          'Warning you are running Gemini Actus in your home directory',
         ),
       );
       expect(warnings).toContainEqual(

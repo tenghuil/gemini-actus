@@ -23,7 +23,7 @@ import { FolderTrustChoice } from '../components/FolderTrustDialog.js';
 import type { LoadedTrustedFolders } from '../../config/trustedFolders.js';
 import { TrustLevel } from '../../config/trustedFolders.js';
 import * as trustedFolders from '../../config/trustedFolders.js';
-import { coreEvents, ExitCodes } from '@google/gemini-cli-core';
+import { coreEvents, ExitCodes } from '@google/gemini-actus-core';
 
 const mockedCwd = vi.hoisted(() => vi.fn());
 const mockedExit = vi.hoisted(() => vi.fn());
@@ -302,7 +302,7 @@ describe('useFolderTrust', () => {
 
     expect(emitFeedbackSpy).toHaveBeenCalledWith(
       'error',
-      'Failed to save trust settings. Exiting Gemini CLI.',
+      'Failed to save trust settings. Exiting Gemini Actus.',
     );
     expect(mockedExit).toHaveBeenCalledWith(ExitCodes.FATAL_CONFIG_ERROR);
   });

@@ -20,7 +20,7 @@ import type {
   ExtensionsStoppingEvent,
   ToolCallConfirmationDetails,
   AgentDefinition,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import {
   GitService,
   Logger,
@@ -34,7 +34,7 @@ import {
   addMCPStatusChangeListener,
   removeMCPStatusChangeListener,
   MCPDiscoveryState,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { useSessionStats } from '../contexts/SessionContext.js';
 import type {
   Message,

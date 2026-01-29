@@ -11,7 +11,7 @@ import { Text, useIsScreenReaderEnabled, type DOMElement } from 'ink';
 import { App } from './App.js';
 import { type UIState } from './contexts/UIStateContext.js';
 import { StreamingState, ToolCallStatus } from './types.js';
-import { makeFakeConfig } from '@google/gemini-cli-core';
+import { makeFakeConfig } from '@google/gemini-actus-core';
 
 vi.mock('ink', async (importOriginal) => {
   const original = await importOriginal<typeof import('ink')>();

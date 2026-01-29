@@ -4,4 +4,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from '@google/gemini-cli-test-utils';
+export * from '@google/gemini-actus-test-utils';

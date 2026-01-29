@@ -22,7 +22,7 @@ vi.mock('../contexts/VimModeContext.js', () => ({
     vimMode: 'NORMAL',
   })),
 }));
-import { ApprovalMode } from '@google/gemini-cli-core';
+import { ApprovalMode } from '@google/gemini-actus-core';
 import { StreamingState } from '../types.js';
 import { mergeSettings } from '../../config/settings.js';
 

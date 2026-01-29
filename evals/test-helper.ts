@@ -8,10 +8,10 @@ import { it } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
-import { TestRig } from '@google/gemini-cli-test-utils';
-import { createUnauthorizedToolError } from '@google/gemini-cli-core';
+import { TestRig } from '@google/gemini-actus-test-utils';
+import { createUnauthorizedToolError } from '@google/gemini-actus-core';
 
-export * from '@google/gemini-cli-test-utils';
+export * from '@google/gemini-actus-test-utils';
 
 // Indicates the consistency expectation for this test.
 // - ALWAYS_PASSES - Means that the test is expected to pass 100% of the time. These

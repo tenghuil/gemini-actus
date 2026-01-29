@@ -9,8 +9,8 @@ import { ToolConfirmationMessage } from './ToolConfirmationMessage.js';
 import type {
   ToolCallConfirmationDetails,
   Config,
-} from '@google/gemini-cli-core';
-import { initializeShellParsers } from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
+import { initializeShellParsers } from '@google/gemini-actus-core';
 import { renderWithProviders } from '../../../test-utils/render.js';
 
 describe('ToolConfirmationMessage Redirection', () => {

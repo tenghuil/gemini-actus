@@ -9,7 +9,7 @@ import { act } from 'react';
 import { renderWithProviders } from '../../test-utils/render.js';
 import { waitFor } from '../../test-utils/async.js';
 import { AskUserDialog } from './AskUserDialog.js';
-import { QuestionType, type Question } from '@google/gemini-cli-core';
+import { QuestionType, type Question } from '@google/gemini-actus-core';
 
 // Helper to write to stdin with proper act() wrapping
 const writeKey = (stdin: { write: (data: string) => void }, key: string) => {

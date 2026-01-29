@@ -9,7 +9,7 @@ import {
   SessionEndReason,
   SessionStartSource,
   flushTelemetry,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import type { SlashCommand } from './types.js';
 import { CommandKind } from './types.js';
 import { MessageType } from '../types.js';

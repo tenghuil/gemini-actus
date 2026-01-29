@@ -17,7 +17,7 @@ import {
   type EditorType,
   type ToolCallsUpdateMessage,
   ROOT_SCHEDULER_ID,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { useCallback, useState, useMemo, useEffect, useRef } from 'react';
 
 // Re-exporting types compatible with legacy hook expectations

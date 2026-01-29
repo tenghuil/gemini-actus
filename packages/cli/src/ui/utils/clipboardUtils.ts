@@ -14,7 +14,7 @@ import {
   unescapePath,
   escapePath,
   Storage,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 
 /**
  * Supported image file extensions based on Gemini API.

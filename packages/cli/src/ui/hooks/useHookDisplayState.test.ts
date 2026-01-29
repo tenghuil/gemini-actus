@@ -12,7 +12,7 @@ import {
   CoreEvent,
   type HookStartPayload,
   type HookEndPayload,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { act } from 'react';
 
 describe('useHookDisplayState', () => {

@@ -10,7 +10,7 @@ import { ToolConfirmationQueue } from './ToolConfirmationQueue.js';
 import { ToolCallStatus, StreamingState } from '../types.js';
 import { renderWithProviders } from '../../test-utils/render.js';
 import { waitFor } from '../../test-utils/async.js';
-import type { Config } from '@google/gemini-cli-core';
+import type { Config } from '@google/gemini-actus-core';
 import type { ConfirmingToolState } from '../hooks/useConfirmingTool.js';
 
 describe('ToolConfirmationQueue', () => {

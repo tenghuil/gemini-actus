@@ -9,7 +9,7 @@ import {
   coreEvents,
   type Config,
   type ResumedSessionData,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import type { Part } from '@google/genai';
 import type { HistoryItemWithoutId } from '../types.js';
 import type { UseHistoryManagerReturn } from './useHistoryManager.js';

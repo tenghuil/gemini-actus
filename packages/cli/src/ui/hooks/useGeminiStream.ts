@@ -31,7 +31,7 @@ import {
   ValidationRequiredError,
   coreEvents,
   CoreEvent,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import type {
   Config,
   EditorType,
@@ -45,7 +45,7 @@ import type {
   GeminiErrorEventValue,
   RetryAttemptPayload,
   ToolCallConfirmationDetails,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { type Part, type PartListUnion, FinishReason } from '@google/genai';
 import type {
   HistoryItem,

@@ -1,14 +1,28 @@
-# Gemini CLI Project Context
+# Gemini Actus Project Context
 
-Gemini CLI is an open-source AI agent that brings the power of Gemini directly
-into the terminal. It is designed to be a terminal-first, extensible, and
-powerful tool for developers.
+Gemini Actus is an open-source AI agent that brings the power of Gemini directly
+into the terminal. It is capable of software engineering, research, and general
+assistance.
+
+## Agent Memory & Context
+
+This file (`GEMINI.md`) serves as the **Project Context** for the agent.
+
+- Content in this file is automatically loaded into the agent's memory.
+- Use it to provide persistent instructions, project conventions, architectural
+  decisions, or personal preferences.
+- The agent scans for `GEMINI.md` in the current directory and parent
+  directories, allowing for hierarchical configuration.
 
 ## Project Overview
 
 - **Purpose:** Provide a seamless terminal interface for Gemini models,
-  supporting code understanding, generation, automation, and integration via MCP
-  (Model Context Protocol).
+  supporting extensive capabilities:
+  - **Software Engineering:** Coding, refactoring, testing, and debugging.
+  - **Research:** Gathering information, synthesizing data, and answering
+    questions.
+  - **General Assistance:** Performing diverse tasks and aiding with workflows.
+  - **Integration:** Extensible via MCP (Model Context Protocol).
 - **Main Technologies:**
   - **Runtime:** Node.js (>=20.0.0, recommended ~20.19.0 for development)
   - **Language:** TypeScript
@@ -45,7 +59,7 @@ powerful tool for developers.
   - **Integration (E2E):** `npm run test:e2e`
   - **Workspace-Specific:** `npm test -w <pkg> -- <path>` (Note: `<path>` must
     be relative to the workspace root, e.g.,
-    `-w @google/gemini-cli-core -- src/routing/modelRouterService.test.ts`)
+    `-w @google/gemini-actus-core -- src/routing/modelRouterService.test.ts`)
 - **Full Validation:** `npm run preflight` (Heaviest check; runs clean, install,
   build, lint, type check, and tests. Recommended before submitting PRs.)
 - **Individual Checks:** `npm run lint` / `npm run format` / `npm run typecheck`

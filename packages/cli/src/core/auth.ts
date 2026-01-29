@@ -9,7 +9,7 @@ import {
   type Config,
   getErrorMessage,
   ValidationRequiredError,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 
 /**
  * Handles the initial authentication flow.

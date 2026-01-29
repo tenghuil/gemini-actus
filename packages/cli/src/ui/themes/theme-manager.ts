@@ -19,14 +19,14 @@ import { XCode } from './xcode.js';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import type { Theme, ThemeType } from './theme.js';
-import type { CustomTheme } from '@google/gemini-cli-core';
+import type { CustomTheme } from '@google/gemini-actus-core';
 import { createCustomTheme, validateCustomTheme } from './theme.js';
 import type { SemanticColors } from './semantic-tokens.js';
 import { ANSI } from './ansi.js';
 import { ANSILight } from './ansi-light.js';
 import { NoColorTheme } from './no-color.js';
 import process from 'node:process';
-import { debugLogger, homedir } from '@google/gemini-cli-core';
+import { debugLogger, homedir } from '@google/gemini-actus-core';
 
 export interface ThemeDisplay {
   name: string;

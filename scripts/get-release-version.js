@@ -39,9 +39,9 @@ function getArgs() {
     })
     .option('cli-package-name', {
       description:
-        'fully qualified package name with scope (e.g @google/gemini-cli)',
+        'fully qualified package name with scope (e.g @google/gemini-actus)',
       string: true,
-      default: '@google/gemini-cli',
+      default: '@google/gemini-actus',
     })
     .option('preview_version_override', {
       description: 'Override the calculated preview version.',

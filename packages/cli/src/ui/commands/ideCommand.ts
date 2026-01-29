@@ -11,13 +11,13 @@ import {
   logIdeConnection,
   IdeConnectionEvent,
   IdeConnectionType,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import {
   getIdeInstaller,
   IDEConnectionStatus,
   ideContextStore,
   GEMINI_CLI_COMPANION_EXTENSION_NAME,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import path from 'node:path';
 import type {
   CommandContext,
@@ -146,7 +146,7 @@ export const ideCommand = async (): Promise<SlashCommand> => {
         ({
           type: 'message',
           messageType: 'error',
-          content: `IDE integration is not supported in your current environment. To use this feature, run Gemini CLI in one of these supported IDEs: Antigravity, VS Code, or VS Code forks.`,
+          content: `IDE integration is not supported in your current environment. To use this feature, run Gemini Actus in one of these supported IDEs: Antigravity, VS Code, or VS Code forks.`,
         }) as const,
     };
   }

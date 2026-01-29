@@ -6,8 +6,8 @@
 
 export const PREVIEW_GEMINI_MODEL = 'gemini-3-pro-preview';
 export const PREVIEW_GEMINI_FLASH_MODEL = 'gemini-3-flash-preview';
-export const DEFAULT_GEMINI_MODEL = 'gemini-2.5-pro';
-export const DEFAULT_GEMINI_FLASH_MODEL = 'gemini-2.5-flash';
+export const DEFAULT_GEMINI_MODEL = 'gemini-3-pro-preview';
+export const DEFAULT_GEMINI_FLASH_MODEL = 'gemini-3-flash-preview';
 export const DEFAULT_GEMINI_FLASH_LITE_MODEL = 'gemini-2.5-flash-lite';
 
 export const VALID_GEMINI_MODELS = new Set([
@@ -19,7 +19,7 @@ export const VALID_GEMINI_MODELS = new Set([
 ]);
 
 export const PREVIEW_GEMINI_MODEL_AUTO = 'auto-gemini-3';
-export const DEFAULT_GEMINI_MODEL_AUTO = 'auto-gemini-2.5';
+export const DEFAULT_GEMINI_MODEL_AUTO = 'gemini-3-flash-preview';
 
 // Model aliases for user convenience.
 export const GEMINI_MODEL_ALIAS_AUTO = 'auto';
@@ -49,7 +49,7 @@ export function resolveModel(
       return PREVIEW_GEMINI_MODEL;
     }
     case DEFAULT_GEMINI_MODEL_AUTO: {
-      return DEFAULT_GEMINI_MODEL;
+      return DEFAULT_GEMINI_MODEL_AUTO;
     }
     case GEMINI_MODEL_ALIAS_AUTO:
     case GEMINI_MODEL_ALIAS_PRO: {

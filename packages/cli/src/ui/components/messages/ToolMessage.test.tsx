@@ -11,7 +11,7 @@ import { ToolMessage } from './ToolMessage.js';
 import { StreamingState, ToolCallStatus } from '../../types.js';
 import { Text } from 'ink';
 import { StreamingContext } from '../../contexts/StreamingContext.js';
-import type { AnsiOutput } from '@google/gemini-cli-core';
+import type { AnsiOutput } from '@google/gemini-actus-core';
 import { renderWithProviders } from '../../../test-utils/render.js';
 import { tryParseJSON } from '../../../utils/jsonoutput.js';
 

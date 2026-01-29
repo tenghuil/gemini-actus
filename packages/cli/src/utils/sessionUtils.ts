@@ -8,11 +8,11 @@ import type {
   Config,
   ConversationRecord,
   MessageRecord,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import {
   partListUnionToString,
   SESSION_FILE_PREFIX,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import * as fs from 'node:fs/promises';
 import path from 'node:path';
 import { stripUnsafeCharacters } from '../ui/utils/textUtils.js';

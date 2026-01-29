@@ -9,7 +9,7 @@ import { RELAUNCH_EXIT_CODE } from './processUtils.js';
 import {
   writeToStderr,
   type FetchAdminControlsResponse,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 
 export async function relaunchOnExitCode(runner: () => Promise<number>) {
   while (true) {

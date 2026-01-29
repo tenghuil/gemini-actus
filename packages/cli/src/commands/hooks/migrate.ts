@@ -7,7 +7,7 @@
 import type { CommandModule } from 'yargs';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { debugLogger, getErrorMessage } from '@google/gemini-cli-core';
+import { debugLogger, getErrorMessage } from '@google/gemini-actus-core';
 import { loadSettings, SettingScope } from '../../config/settings.js';
 import { exitCli } from '../utils.js';
 import stripJsonComments from 'strip-json-comments';
@@ -251,7 +251,7 @@ export async function handleMigrateFromClaude() {
 
 export const migrateCommand: CommandModule = {
   command: 'migrate',
-  describe: 'Migrate hooks from Claude Code to Gemini CLI',
+  describe: 'Migrate hooks from Claude Code to Gemini Actus',
   builder: (yargs) =>
     yargs.option('from-claude', {
       describe: 'Migrate from Claude Code hooks',
@@ -264,7 +264,7 @@ export const migrateCommand: CommandModule = {
       await handleMigrateFromClaude();
     } else {
       debugLogger.log(
-        'Usage: gemini hooks migrate --from-claude\n\nMigrate hooks from Claude Code to Gemini CLI format.',
+        'Usage: gemini hooks migrate --from-claude\n\nMigrate hooks from Claude Code to Gemini Actus format.',
       );
     }
     await exitCli();

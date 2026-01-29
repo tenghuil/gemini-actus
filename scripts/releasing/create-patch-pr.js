@@ -32,9 +32,9 @@ async function main() {
     })
     .option('cli-package-name', {
       description:
-        'fully qualified package name with scope (e.g @google/gemini-cli)',
+        'fully qualified package name with scope (e.g @google/gemini-actus)',
       string: true,
-      default: '@google/gemini-cli',
+      default: '@google/gemini-actus',
     })
     .option('dry-run', {
       description: 'Whether to run in dry-run mode.',

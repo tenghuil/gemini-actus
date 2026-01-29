@@ -17,10 +17,10 @@ import {
   type ExtensionLoader,
   debugLogger,
   ApprovalMode,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { loadCliConfig, parseArguments, type CliArgs } from './config.js';
 import { type Settings, createTestMergedSettings } from './settings.js';
-import * as ServerConfig from '@google/gemini-cli-core';
+import * as ServerConfig from '@google/gemini-actus-core';
 
 import { isWorkspaceTrusted } from './trustedFolders.js';
 import { ExtensionManager } from './extension-manager.js';
@@ -90,9 +90,9 @@ vi.mock('read-package-up', () => ({
   ),
 }));
 
-vi.mock('@google/gemini-cli-core', async () => {
+vi.mock('@google/gemini-actus-core', async () => {
   const actualServer = await vi.importActual<typeof ServerConfig>(
-    '@google/gemini-cli-core',
+    '@google/gemini-actus-core',
   );
   return {
     ...actualServer,
@@ -1467,7 +1467,7 @@ describe('loadCliConfig model selection', () => {
       argv,
     );
 
-    expect(config.getModel()).toBe('auto-gemini-2.5');
+    expect(config.getModel()).toBe('gemini-3-flash-preview');
   });
 
   it('always prefers model from argv', async () => {
@@ -1511,7 +1511,7 @@ describe('loadCliConfig model selection', () => {
       argv,
     );
 
-    expect(config.getModel()).toBe('auto-gemini-2.5');
+    expect(config.getModel()).toBe('gemini-3-flash-preview');
   });
 });
 

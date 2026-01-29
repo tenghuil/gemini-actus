@@ -9,7 +9,7 @@ import { waitFor } from '../../test-utils/async.js';
 import { act } from 'react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { FolderTrustDialog } from './FolderTrustDialog.js';
-import { ExitCodes } from '@google/gemini-cli-core';
+import { ExitCodes } from '@google/gemini-actus-core';
 import * as processUtils from '../../utils/processUtils.js';
 
 vi.mock('../../utils/processUtils.js', () => ({
@@ -74,7 +74,7 @@ describe('FolderTrustDialog', () => {
       <FolderTrustDialog onSelect={vi.fn()} isRestarting={true} />,
     );
 
-    expect(lastFrame()).toContain('Gemini CLI is restarting');
+    expect(lastFrame()).toContain('Gemini Actus is restarting');
   });
 
   it('should call relaunchApp when isRestarting is true', async () => {

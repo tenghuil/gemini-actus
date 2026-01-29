@@ -7,7 +7,7 @@
 import type React from 'react';
 import { Box, Text } from 'ink';
 import { theme } from '../semantic-colors.js';
-import { ApprovalMode } from '@google/gemini-cli-core';
+import { ApprovalMode } from '@google/gemini-actus-core';
 
 interface ApprovalModeIndicatorProps {
   approvalMode: ApprovalMode;

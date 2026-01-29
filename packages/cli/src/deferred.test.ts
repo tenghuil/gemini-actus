@@ -11,7 +11,7 @@ import {
   setDeferredCommand,
   type DeferredCommand,
 } from './deferred.js';
-import { ExitCodes } from '@google/gemini-cli-core';
+import { ExitCodes } from '@google/gemini-actus-core';
 import type { ArgumentsCamelCase, CommandModule } from 'yargs';
 import type { MergedSettings } from './config/settings.js';
 import type { MockInstance } from 'vitest';
@@ -24,8 +24,8 @@ const { mockRunExitCleanup, mockDebugLogger } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock('@google/gemini-cli-core', async () => {
-  const actual = await vi.importActual('@google/gemini-cli-core');
+vi.mock('@google/gemini-actus-core', async () => {
+  const actual = await vi.importActual('@google/gemini-actus-core');
   return {
     ...actual,
     debugLogger: mockDebugLogger,

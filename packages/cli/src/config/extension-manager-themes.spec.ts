@@ -19,7 +19,7 @@ import {
 import { createExtension } from '../test-utils/createExtension.js';
 import { ExtensionManager } from './extension-manager.js';
 import { themeManager, DEFAULT_THEME } from '../ui/themes/theme-manager.js';
-import { GEMINI_DIR, type Config } from '@google/gemini-cli-core';
+import { GEMINI_DIR, type Config } from '@google/gemini-actus-core';
 import { createTestMergedSettings, SettingScope } from './settings.js';
 
 describe('ExtensionManager theme loading', () => {

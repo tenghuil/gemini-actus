@@ -19,11 +19,11 @@ import {
   showMemory,
   addMemory,
   listMemoryFiles,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
+vi.mock('@google/gemini-actus-core', async (importOriginal) => {
   const original =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+    await importOriginal<typeof import('@google/gemini-actus-core')>();
   return {
     ...original,
     getErrorMessage: vi.fn((error: unknown) => {

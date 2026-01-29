@@ -5,7 +5,7 @@
  */
 
 import type { CommandModule } from 'yargs';
-import { debugLogger, type SkillDefinition } from '@google/gemini-cli-core';
+import { debugLogger, type SkillDefinition } from '@google/gemini-actus-core';
 import { getErrorMessage } from '../../utils/errors.js';
 import { exitCli } from '../utils.js';
 import { installSkill } from '../../utils/skillUtils.js';

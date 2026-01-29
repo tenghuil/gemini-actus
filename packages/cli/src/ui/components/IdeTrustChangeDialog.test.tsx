@@ -8,7 +8,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import * as processUtils from '../../utils/processUtils.js';
 import { renderWithProviders } from '../../test-utils/render.js';
 import { IdeTrustChangeDialog } from './IdeTrustChangeDialog.js';
-import { debugLogger } from '@google/gemini-cli-core';
+import { debugLogger } from '@google/gemini-actus-core';
 
 describe('IdeTrustChangeDialog', () => {
   beforeEach(() => {

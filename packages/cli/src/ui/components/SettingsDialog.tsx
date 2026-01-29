@@ -37,8 +37,8 @@ import {
   type SettingsValue,
   TOGGLE_TYPES,
 } from '../../config/settingsSchema.js';
-import { coreEvents, debugLogger } from '@google/gemini-cli-core';
-import type { Config } from '@google/gemini-cli-core';
+import { coreEvents, debugLogger } from '@google/gemini-actus-core';
+import type { Config } from '@google/gemini-actus-core';
 import { useUIState } from '../contexts/UIStateContext.js';
 import { useTextBuffer } from './shared/text-buffer.js';
 import {
@@ -698,7 +698,7 @@ export function SettingsDialog({
   // Footer content for restart prompt
   const footerContent = showRestartPrompt ? (
     <Text color={theme.status.warning}>
-      To see changes, Gemini CLI must be restarted. Press r to exit and apply
+      To see changes, Gemini Actus must be restarted. Press r to exit and apply
       changes now.
     </Text>
   ) : null;

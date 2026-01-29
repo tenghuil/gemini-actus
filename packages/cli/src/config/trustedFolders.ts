@@ -13,7 +13,7 @@ import {
   ideContextStore,
   GEMINI_DIR,
   homedir,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import type { Settings } from './settings.js';
 import stripJsonComments from 'strip-json-comments';
 

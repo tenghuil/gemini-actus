@@ -11,7 +11,7 @@ import type {
   AnyToolInvocation,
   Config,
   DiscoveredMCPResource,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import {
   debugLogger,
   getErrorMessage,
@@ -20,7 +20,7 @@ import {
   ReadManyFilesTool,
   REFERENCE_CONTENT_START,
   REFERENCE_CONTENT_END,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { Buffer } from 'node:buffer';
 import type { HistoryItem, IndividualToolCallDisplay } from '../types.js';
 import { ToolCallStatus } from '../types.js';

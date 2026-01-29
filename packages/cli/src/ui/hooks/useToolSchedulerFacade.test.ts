@@ -9,7 +9,7 @@ import { renderHook } from '../../test-utils/render.js';
 import { useToolScheduler } from './useToolScheduler.js';
 import { useReactToolScheduler } from './useReactToolScheduler.js';
 import { useToolExecutionScheduler } from './useToolExecutionScheduler.js';
-import type { Config } from '@google/gemini-cli-core';
+import type { Config } from '@google/gemini-actus-core';
 
 vi.mock('./useReactToolScheduler.js', () => ({
   useReactToolScheduler: vi.fn().mockReturnValue(['legacy']),

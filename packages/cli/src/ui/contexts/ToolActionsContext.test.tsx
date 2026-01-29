@@ -14,13 +14,13 @@ import {
   MessageBusType,
   IdeClient,
   type ToolCallConfirmationDetails,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { ToolCallStatus, type IndividualToolCallDisplay } from '../types.js';
 
 // Mock IdeClient
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
+vi.mock('@google/gemini-actus-core', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+    await importOriginal<typeof import('@google/gemini-actus-core')>();
   return {
     ...actual,
     IdeClient: {

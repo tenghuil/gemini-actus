@@ -11,7 +11,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   getDisplayString,
   type RetryAttemptPayload,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 
 export interface UseLoadingIndicatorProps {
   streamingState: StreamingState;

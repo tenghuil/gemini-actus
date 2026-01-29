@@ -17,8 +17,8 @@ import {
   calculateTransformationsForLine,
   calculateTransformedLine,
 } from './shared/text-buffer.js';
-import type { Config } from '@google/gemini-cli-core';
-import { ApprovalMode, debugLogger } from '@google/gemini-cli-core';
+import type { Config } from '@google/gemini-actus-core';
+import { ApprovalMode, debugLogger } from '@google/gemini-actus-core';
 import * as path from 'node:path';
 import type { CommandContext, SlashCommand } from '../commands/types.js';
 import { CommandKind } from '../commands/types.js';

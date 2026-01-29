@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { StreamingState } from '../types.js';
-import { hasRedirection } from '@google/gemini-cli-core';
+import { hasRedirection } from '@google/gemini-actus-core';
 import { type TrackedToolCall } from './useReactToolScheduler.js';
 
 export interface TurnActivityStatus {

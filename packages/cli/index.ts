@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { main } from './src/gemini.js';
-import { FatalError, writeToStderr } from '@google/gemini-cli-core';
+// import { main } from './src/gemini.js';
+import { FatalError, writeToStderr } from '@google/gemini-actus-core';
 import { runExitCleanup } from './src/utils/cleanup.js';
 
 // --- Global Entry Point ---
@@ -35,22 +35,25 @@ process.on('uncaughtException', (error) => {
   process.exit(1);
 });
 
-main().catch(async (error) => {
-  await runExitCleanup();
+console.log('[DEBUG] CLI: index.ts loaded, dynamically importing main()...');
+import('./src/gemini.js').then(({ main }) => {
+  main().catch(async (error) => {
+    await runExitCleanup();
 
-  if (error instanceof FatalError) {
-    let errorMessage = error.message;
-    if (!process.env['NO_COLOR']) {
-      errorMessage = `\x1b[31m${errorMessage}\x1b[0m`;
+    if (error instanceof FatalError) {
+      let errorMessage = error.message;
+      if (!process.env['NO_COLOR']) {
+        errorMessage = `\x1b[31m${errorMessage}\x1b[0m`;
+      }
+      writeToStderr(errorMessage + '\n');
+      process.exit(error.exitCode);
     }
-    writeToStderr(errorMessage + '\n');
-    process.exit(error.exitCode);
-  }
-  writeToStderr('An unexpected critical error occurred:');
-  if (error instanceof Error) {
-    writeToStderr(error.stack + '\n');
-  } else {
-    writeToStderr(String(error) + '\n');
-  }
-  process.exit(1);
+    writeToStderr('An unexpected critical error occurred:');
+    if (error instanceof Error) {
+      writeToStderr(error.stack + '\n');
+    } else {
+      writeToStderr(String(error) + '\n');
+    }
+    process.exit(1);
+  });
 });

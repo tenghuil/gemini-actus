@@ -5,7 +5,7 @@
  */
 
 import * as osActual from 'node:os';
-import { FatalConfigError, ideContextStore } from '@google/gemini-cli-core';
+import { FatalConfigError, ideContextStore } from '@google/gemini-actus-core';
 import {
   describe,
   it,
@@ -37,9 +37,9 @@ vi.mock('os', async (importOriginal) => {
   };
 });
 
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
+vi.mock('@google/gemini-actus-core', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+    await importOriginal<typeof import('@google/gemini-actus-core')>();
   return {
     ...actual,
     homedir: () => '/mock/home/user',

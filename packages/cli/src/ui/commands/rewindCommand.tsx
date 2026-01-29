@@ -20,8 +20,8 @@ import type { Content } from '@google/genai';
 import type {
   ChatRecordingService,
   GeminiClient,
-} from '@google/gemini-cli-core';
-import { coreEvents, debugLogger } from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
+import { coreEvents, debugLogger } from '@google/gemini-actus-core';
 
 /**
  * Helper function to handle the core logic of rewinding a conversation.

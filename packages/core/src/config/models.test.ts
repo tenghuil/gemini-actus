@@ -85,9 +85,9 @@ describe('resolveModel', () => {
       expect(model).toBe(PREVIEW_GEMINI_MODEL);
     });
 
-    it('should return the Default Pro model when auto-gemini-2.5 is requested', () => {
+    it('should return the Default Auto model (gemini-3-flash-preview) when requested', () => {
       const model = resolveModel(DEFAULT_GEMINI_MODEL_AUTO, false);
-      expect(model).toBe(DEFAULT_GEMINI_MODEL);
+      expect(model).toBe(DEFAULT_GEMINI_MODEL_AUTO);
     });
 
     it('should return the requested model as-is for explicit specific models', () => {

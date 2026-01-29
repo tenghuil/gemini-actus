@@ -12,11 +12,11 @@ import type { LoadedSettings } from '../../config/settings.js';
 import { KeypressProvider } from '../contexts/KeypressContext.js';
 import { act } from 'react';
 import { waitFor } from '../../test-utils/async.js';
-import { debugLogger } from '@google/gemini-cli-core';
+import { debugLogger } from '@google/gemini-actus-core';
 
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
+vi.mock('@google/gemini-actus-core', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+    await importOriginal<typeof import('@google/gemini-actus-core')>();
   return {
     ...actual,
     isEditorAvailable: () => true, // Mock to behave predictably in CI

@@ -13,13 +13,13 @@ import {
   beforeEach,
   afterEach,
 } from 'vitest';
-import type { Config } from '@google/gemini-cli-core';
+import type { Config } from '@google/gemini-actus-core';
 import {
   OutputFormat,
   FatalInputError,
   debugLogger,
   coreEvents,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import {
   getErrorMessage,
   handleError,
@@ -35,9 +35,9 @@ vi.mock('./cleanup.js', () => ({
 }));
 
 // Mock the core modules
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
+vi.mock('@google/gemini-actus-core', async (importOriginal) => {
   const original =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+    await importOriginal<typeof import('@google/gemini-actus-core')>();
 
   return {
     ...original,

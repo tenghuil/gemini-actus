@@ -1,11 +1,11 @@
 {
-  "name": "@google/gemini-cli-core",
+  "name": "@google/gemini-actus-core",
   "version": "0.28.0-nightly.20260128.adc8e11bb",
-  "description": "Gemini CLI Core",
+  "description": "Gemini Actus Core",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/google-gemini/gemini-cli.git"
+    "url": "git+https://github.com/google-gemini/gemini-actus.git"
   },
   "type": "module",
   "main": "dist/index.js",
@@ -69,7 +69,9 @@
     "undici": "^7.10.0",
     "uuid": "^13.0.0",
     "web-tree-sitter": "^0.25.10",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "puppeteer-core": "^24.1.0",
+    "chrome-launcher": "^1.1.0"
   },
   "optionalDependencies": {
     "@lydell/node-pty": "1.1.0",
@@ -82,7 +84,7 @@
     "keytar": "^7.9.0"
   },
   "devDependencies": {
-    "@google/gemini-cli-test-utils": "file:../test-utils",
+    "@google/gemini-actus-test-utils": "file:../test-utils",
     "@types/fast-levenshtein": "^0.0.4",
     "@types/js-yaml": "^4.0.9",
     "@types/minimatch": "^5.1.2",

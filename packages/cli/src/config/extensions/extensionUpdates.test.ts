@@ -17,7 +17,7 @@ import {
   type ExtensionInstallMetadata,
   type GeminiCLIExtension,
   coreEvents,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { EXTENSION_SETTINGS_FILENAME } from './variables.js';
 import { ExtensionManager } from '../extension-manager.js';
 import { createTestMergedSettings } from '../settings.js';
@@ -37,9 +37,9 @@ vi.mock('node:fs', async (importOriginal) => {
   };
 });
 
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
+vi.mock('@google/gemini-actus-core', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+    await importOriginal<typeof import('@google/gemini-actus-core')>();
   return {
     ...actual,
     KeychainTokenStorage: vi.fn(),
@@ -151,7 +151,7 @@ describe('extensionUpdates', () => {
 
       // Setup Keychain
       const userKeychain = new KeychainTokenStorage(
-        `Gemini CLI Extensions test-ext ${extensionId}`,
+        `Gemini Actus Extensions test-ext ${extensionId}`,
       );
       await userKeychain.setSecret('VAR2', 'val2');
 

@@ -13,7 +13,7 @@ import {
   disableModifyOtherKeys,
   enableBracketedPasteMode,
   disableBracketedPasteMode,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 
 export type TerminalBackgroundColor = string | undefined;
 

@@ -20,7 +20,7 @@ import {
 import type { SlashCommand, SlashCommandActionReturn } from './types.js';
 import { CommandKind } from './types.js';
 import { getUrlOpenCommand } from '../../ui/utils/commandUtils.js';
-import { debugLogger } from '@google/gemini-cli-core';
+import { debugLogger } from '@google/gemini-actus-core';
 
 export const GITHUB_WORKFLOW_PATHS = [
   'gemini-dispatch/gemini-dispatch.yml',
@@ -60,7 +60,7 @@ function getOpenUrlsCommands(readmeUrl: string): string[] {
   return commands;
 }
 
-// Add Gemini CLI specific entries to .gitignore file
+// Add Gemini Actus specific entries to .gitignore file
 export async function updateGitignore(gitRepoRoot: string): Promise<void> {
   const gitignoreEntries = ['.gemini/', 'gha-creds-*.json'];
 

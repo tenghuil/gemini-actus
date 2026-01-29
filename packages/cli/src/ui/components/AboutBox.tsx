@@ -47,7 +47,7 @@ export const AboutBox: React.FC<AboutBoxProps> = ({
     >
       <Box marginBottom={1}>
         <Text bold color={theme.text.accent}>
-          About Gemini CLI
+          About Gemini Actus
         </Text>
       </Box>
       <Box flexDirection="row">

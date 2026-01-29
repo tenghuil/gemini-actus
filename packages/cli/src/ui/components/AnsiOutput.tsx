@@ -6,7 +6,11 @@
 
 import type React from 'react';
 import { Box, Text } from 'ink';
-import type { AnsiLine, AnsiOutput, AnsiToken } from '@google/gemini-cli-core';
+import type {
+  AnsiLine,
+  AnsiOutput,
+  AnsiToken,
+} from '@google/gemini-actus-core';
 
 const DEFAULT_HEIGHT = 24;
 

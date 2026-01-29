@@ -15,7 +15,7 @@ import { ToolConfirmationMessage } from './ToolConfirmationMessage.js';
 import { theme } from '../../semantic-colors.js';
 import { useConfig } from '../../contexts/ConfigContext.js';
 import { isShellTool, isThisShellFocused } from './ToolShared.js';
-import { ASK_USER_DISPLAY_NAME } from '@google/gemini-cli-core';
+import { ASK_USER_DISPLAY_NAME } from '@google/gemini-actus-core';
 import { ShowMoreLines } from '../ShowMoreLines.js';
 import { useUIState } from '../../contexts/UIStateContext.js';
 

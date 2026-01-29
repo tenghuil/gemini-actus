@@ -71,7 +71,7 @@ import {
   type AskUserRequest,
   type AgentsDiscoveredPayload,
   ChangeAuthRequestedError,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { validateAuthMethod } from '../config/auth.js';
 import process from 'node:process';
 import { useHistory } from './hooks/useHistoryManager.js';
@@ -687,7 +687,7 @@ export const AppContainer = (props: AppContainerProps) => {
           await runExitCleanup();
           writeToStdout(`
 ----------------------------------------------------------------
-Logging in with Google... Restarting Gemini CLI to continue.
+Logging in with Google... Restarting Gemini Actus to continue.
 ----------------------------------------------------------------
           `);
           process.exit(RELAUNCH_EXIT_CODE);
@@ -1547,7 +1547,7 @@ Logging in with Google... Restarting Gemini CLI to continue.
       lastTitleRef.current = paddedTitle;
       stdout.write(`\x1b]0;${paddedTitle}\x07`);
     }
-    // Note: We don't need to reset the window title on exit because Gemini CLI is already doing that elsewhere
+    // Note: We don't need to reset the window title on exit because Gemini Actus is already doing that elsewhere
   }, [
     streamingState,
     thought,

@@ -50,6 +50,10 @@ export class AgentRegistry {
     coreEvents.on(CoreEvent.ModelChanged, this.onModelChanged);
 
     await this.loadAgents();
+    // Initialize subagent registry
+    await import('./subagent-registry.js').then((m) =>
+      m.subagentRegistry.load(),
+    );
   }
 
   private onModelChanged = () => {

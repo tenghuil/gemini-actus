@@ -9,7 +9,7 @@ import type {
   EditorType,
   CompletedToolCall,
   ToolCallRequestInfo,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import {
   useReactToolScheduler,
   type TrackedToolCall as LegacyTrackedToolCall,

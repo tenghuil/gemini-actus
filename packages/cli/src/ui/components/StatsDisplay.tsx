@@ -24,7 +24,7 @@ import { computeSessionStats } from '../utils/computeStats.js';
 import {
   type RetrieveUserQuotaResponse,
   VALID_GEMINI_MODELS,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { useSettings } from '../contexts/SettingsContext.js';
 
 // A more flexible and powerful StatRow component

@@ -33,9 +33,9 @@ vi.mock('node:child_process', async (importOriginal) => {
     execSync: vi.fn(),
   };
 });
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
+vi.mock('@google/gemini-actus-core', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+    await importOriginal<typeof import('@google/gemini-actus-core')>();
   return {
     ...actual,
     spawnAsync: vi.fn(),
@@ -49,7 +49,7 @@ vi.mock('@google/gemini-cli-core', async (importOriginal) => {
   };
 });
 
-import { spawnAsync } from '@google/gemini-cli-core';
+import { spawnAsync } from '@google/gemini-actus-core';
 // Keep static imports for stateless functions
 import {
   cleanupOldClipboardImages,

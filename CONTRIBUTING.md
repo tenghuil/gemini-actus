@@ -4,13 +4,13 @@ We would love to accept your patches and contributions to this project. This
 document includes:
 
 - **[Before you begin](#before-you-begin):** Essential steps to take before
-  becoming a Gemini CLI contributor.
+  becoming a Gemini Actus contributor.
 - **[Code contribution process](#code-contribution-process):** How to contribute
-  code to Gemini CLI.
+  code to Gemini Actus.
 - **[Development setup and workflow](#development-setup-and-workflow):** How to
   set up your development environment and workflow.
 - **[Documentation contribution process](#documentation-contribution-process):**
-  How to contribute documentation to Gemini CLI.
+  How to contribute documentation to Gemini Actus.
 
 We're looking forward to seeing your contributions!
 
@@ -65,7 +65,7 @@ recommend running our automated frontend review tool. **Note: This tool is
 currently experimental.** It helps detect common React anti-patterns, testing
 issues, and other frontend-specific best practices that are easy to miss.
 
-To run the review tool, enter the following command from within Gemini CLI:
+To run the review tool, enter the following command from within Gemini Actus:
 
 ```text
 /review-frontend <PR_NUMBER>
@@ -474,7 +474,7 @@ our documentation to be clear, concise, and helpful to our users. We value:
 - **Accuracy:** Ensure all information is correct and up-to-date.
 - **Completeness:** Cover all aspects of a feature or topic.
 - **Examples:** Provide practical examples to help users understand how to use
-  Gemini CLI.
+  Gemini Actus.
 
 ### Getting started
 
@@ -551,4 +551,4 @@ If you have questions about contributing documentation:
   your proposed changes.
 - Reach out to the maintainers.
 
-We appreciate your contributions to making Gemini CLI documentation better!
+We appreciate your contributions to making Gemini Actus documentation better!

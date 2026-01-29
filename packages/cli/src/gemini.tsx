@@ -64,7 +64,7 @@ import {
   ValidationCancelledError,
   ValidationRequiredError,
   type FetchAdminControlsResponse,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import {
   initializeApp,
   type InitializationResult,
@@ -296,6 +296,14 @@ export async function main() {
   registerCleanup(adminControlsListner.cleanup);
 
   const cleanupStdio = patchStdio();
+  // Initialize output listeners immediately to ensure we don't lose early logs like Auth URLs.
+  initializeOutputListenersAndFlush();
+
+  registerSyncCleanup(() => {
+    // This is needed to ensure we don't lose any buffered output.
+    initializeOutputListenersAndFlush();
+    cleanupStdio();
+  });
   registerSyncCleanup(() => {
     // This is needed to ensure we don't lose any buffered output.
     initializeOutputListenersAndFlush();
@@ -471,7 +479,7 @@ export async function main() {
             finalArgs[promptIndex + 1] =
               `${stdinData}\n\n${finalArgs[promptIndex + 1]}`;
           } else {
-            // If there's no prompt argument, add stdin as the prompt
+            // If there's no prompt argument, add stdin to args
             finalArgs.push('--prompt', stdinData);
           }
         }
@@ -493,7 +501,7 @@ export async function main() {
   }
 
   // We are now past the logic handling potentially launching a child process
-  // to run Gemini CLI. It is now safe to perform expensive initialization that
+  // to run Gemini Actus. It is now safe to perform expensive initialization that
   // may have side effects.
   {
     const loadConfigHandle = startupProfiler.start('load_cli_config');

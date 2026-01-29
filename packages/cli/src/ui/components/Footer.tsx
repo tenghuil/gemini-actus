@@ -11,7 +11,7 @@ import {
   shortenPath,
   tildeifyPath,
   getDisplayString,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { ConsoleSummaryDisplay } from './ConsoleSummaryDisplay.js';
 import process from 'node:process';
 import { ThemedGradient } from './ThemedGradient.js';

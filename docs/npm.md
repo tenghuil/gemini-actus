@@ -1,20 +1,21 @@
 # Package overview
 
-This monorepo contains two main packages: `@google/gemini-cli` and
-`@google/gemini-cli-core`.
+This monorepo contains two main packages: `@google/gemini-actus` and
+`@google/gemini-actus-core`.
 
-## `@google/gemini-cli`
+## `@google/gemini-actus`
 
 This is the main package for the Gemini CLI. It is responsible for the user
 interface, command parsing, and all other user-facing functionality.
 
 When this package is published, it is bundled into a single executable file.
 This bundle includes all of the package's dependencies, including
-`@google/gemini-cli-core`. This means that whether a user installs the package
-with `npm install -g @google/gemini-cli` or runs it directly with
-`npx @google/gemini-cli`, they are using this single, self-contained executable.
+`@google/gemini-actus-core`. This means that whether a user installs the package
+with `npm install -g @google/gemini-actus` or runs it directly with
+`npx @google/gemini-actus`, they are using this single, self-contained
+executable.
 
-## `@google/gemini-cli-core`
+## `@google/gemini-actus-core`
 
 This package contains the core logic for interacting with the Gemini API. It is
 responsible for making API requests, handling authentication, and managing the
@@ -59,4 +60,4 @@ package that should be managed as part of the workspace.
 - **Simplified script execution**: You can run scripts in any package from the
   root of the project using the `--workspace` flag. For example, to run the
   `build` script in the `cli` package, you can run
-  `npm run build --workspace @google/gemini-cli`.
+  `npm run build --workspace @google/gemini-actus`.

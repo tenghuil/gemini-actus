@@ -31,7 +31,7 @@ import {
   type AgentDefinition,
   MessageBusType,
   QuestionType,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import {
   AskUserActionsContext,
   type AskUserState,
@@ -55,9 +55,9 @@ const mocks = vi.hoisted(() => ({
   mockStdout: { write: vi.fn() },
 }));
 
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
+vi.mock('@google/gemini-actus-core', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+    await importOriginal<typeof import('@google/gemini-actus-core')>();
   return {
     ...actual,
     coreEvents: mockCoreEvents,
@@ -191,7 +191,7 @@ import {
   writeToStdout,
   enableMouseEvents,
   disableMouseEvents,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { type ExtensionManager } from '../config/extension-manager.js';
 
 describe('AppContainer State Management', () => {
@@ -1085,7 +1085,7 @@ describe('AppContainer State Management', () => {
 
       expect(titleWrites).toHaveLength(1);
       expect(titleWrites[0][0]).toBe(
-        `\x1b]0;${'Gemini CLI (workspace)'.padEnd(80, ' ')}\x07`,
+        `\x1b]0;${'Gemini Actus (workspace)'.padEnd(80, ' ')}\x07`,
       );
       unmount();
     });

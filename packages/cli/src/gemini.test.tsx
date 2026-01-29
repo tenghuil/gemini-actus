@@ -52,7 +52,7 @@ import {
   type ResumedSessionData,
   debugLogger,
   coreEvents,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { act } from 'react';
 import { type InitializationResult } from './core/initializer.js';
 
@@ -61,9 +61,9 @@ const performance = vi.hoisted(() => ({
 }));
 vi.stubGlobal('performance', performance);
 
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
+vi.mock('@google/gemini-actus-core', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+    await importOriginal<typeof import('@google/gemini-actus-core')>();
   return {
     ...actual,
     recordSlowRender: vi.fn(),
@@ -309,7 +309,7 @@ describe('initializeOutputListenersAndFlush', () => {
   });
 
   it('should flush backlogs and setup listeners if no listeners exist', async () => {
-    const { coreEvents } = await import('@google/gemini-cli-core');
+    const { coreEvents } = await import('@google/gemini-actus-core');
     const { initializeOutputListenersAndFlush } = await import('./gemini.js');
 
     // Mock listenerCount to return 0
@@ -1304,7 +1304,7 @@ describe('gemini.tsx main function exit codes', () => {
       './config/config.js'
     );
     const { loadSettings } = await import('./config/settings.js');
-    const { AuthType } = await import('@google/gemini-cli-core');
+    const { AuthType } = await import('@google/gemini-actus-core');
 
     const refreshAuthSpy = vi.fn();
 
@@ -1505,7 +1505,7 @@ describe('startInteractiveUI', () => {
   });
 
   it('should enable mouse events when alternate buffer is enabled', async () => {
-    const { enableMouseEvents } = await import('@google/gemini-cli-core');
+    const { enableMouseEvents } = await import('@google/gemini-actus-core');
     await startTestInteractiveUI(
       mockConfig,
       mockSettings,
@@ -1532,7 +1532,7 @@ describe('startInteractiveUI', () => {
   });
 
   it('should perform all startup tasks in correct order', async () => {
-    const { getVersion } = await import('@google/gemini-cli-core');
+    const { getVersion } = await import('@google/gemini-actus-core');
     const { checkForUpdates } = await import('./ui/utils/updateCheck.js');
     const { registerCleanup } = await import('./utils/cleanup.js');
 
@@ -1560,7 +1560,7 @@ describe('startInteractiveUI', () => {
   });
 
   it('should not recordSlowRender when less than threshold', async () => {
-    const { recordSlowRender } = await import('@google/gemini-cli-core');
+    const { recordSlowRender } = await import('@google/gemini-actus-core');
     performance.now.mockReturnValueOnce(0);
     await startTestInteractiveUI(
       mockConfig,
@@ -1575,7 +1575,7 @@ describe('startInteractiveUI', () => {
   });
 
   it('should call recordSlowRender when more than threshold', async () => {
-    const { recordSlowRender } = await import('@google/gemini-cli-core');
+    const { recordSlowRender } = await import('@google/gemini-actus-core');
     performance.now.mockReturnValueOnce(0);
     performance.now.mockReturnValueOnce(300);
 

@@ -15,7 +15,7 @@ import {
 } from 'react';
 import { Box, Text } from 'ink';
 import { theme } from '../semantic-colors.js';
-import type { Question } from '@google/gemini-cli-core';
+import type { Question } from '@google/gemini-actus-core';
 import { BaseSelectionList } from './shared/BaseSelectionList.js';
 import type { SelectionListItem } from '../hooks/useSelectionList.js';
 import { TabHeader, type Tab } from './shared/TabHeader.js';

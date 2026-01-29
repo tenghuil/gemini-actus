@@ -20,7 +20,7 @@ import {
   SHELL_TOOL_NAME,
   ASK_USER_DISPLAY_NAME,
   type ToolResultDisplay,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { useInactivityTimer } from '../../hooks/useInactivityTimer.js';
 
 export const STATUS_INDICATOR_WIDTH = 3;

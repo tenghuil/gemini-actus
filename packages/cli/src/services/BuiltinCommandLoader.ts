@@ -11,8 +11,8 @@ import {
   type SlashCommand,
   type CommandContext,
 } from '../ui/commands/types.js';
-import type { MessageActionReturn, Config } from '@google/gemini-cli-core';
-import { isNightly, startupProfiler } from '@google/gemini-cli-core';
+import type { MessageActionReturn, Config } from '@google/gemini-actus-core';
+import { isNightly, startupProfiler } from '@google/gemini-actus-core';
 import { aboutCommand } from '../ui/commands/aboutCommand.js';
 import { agentsCommand } from '../ui/commands/agentsCommand.js';
 import { authCommand } from '../ui/commands/authCommand.js';
@@ -53,7 +53,7 @@ import { terminalSetupCommand } from '../ui/commands/terminalSetupCommand.js';
 
 /**
  * Loads the core, hard-coded slash commands that are an integral part
- * of the Gemini CLI application.
+ * of the Gemini Actus application.
  */
 export class BuiltinCommandLoader implements ICommandLoader {
   constructor(private config: Config | null) {}

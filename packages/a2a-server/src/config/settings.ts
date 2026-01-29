@@ -7,14 +7,14 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import type { MCPServerConfig } from '@google/gemini-cli-core';
+import type { MCPServerConfig } from '@google/gemini-actus-core';
 import {
   debugLogger,
   GEMINI_DIR,
   getErrorMessage,
   type TelemetrySettings,
   homedir,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import stripJsonComments from 'strip-json-comments';
 
 export const USER_SETTINGS_DIR = path.join(homedir(), GEMINI_DIR);

@@ -25,16 +25,29 @@ export class HybridTokenStorage extends BaseTokenStorage {
 
     if (!forceFileStorage) {
       try {
-        const { KeychainTokenStorage } = await import(
-          './keychain-token-storage.js'
-        );
-        const keychainStorage = new KeychainTokenStorage(this.serviceName);
+        const initKeychain = async () => {
+          const { KeychainTokenStorage } = await import(
+            './keychain-token-storage.js'
+          );
+          const keychainStorage = new KeychainTokenStorage(this.serviceName);
 
-        const isAvailable = await keychainStorage.isAvailable();
-        if (isAvailable) {
-          this.storage = keychainStorage;
-          this.storageType = TokenStorageType.KEYCHAIN;
-          return this.storage;
+          const isAvailable = await keychainStorage.isAvailable();
+          if (isAvailable) {
+            this.storage = keychainStorage;
+            this.storageType = TokenStorageType.KEYCHAIN;
+            return this.storage;
+          }
+          return null; // Not available, fall back
+        };
+
+        // Timeout after 1 second to prevent hanging on headless systems
+        const timeoutPromise = new Promise<null>((resolve) => {
+          setTimeout(() => resolve(null), 1000);
+        });
+
+        const result = await Promise.race([initKeychain(), timeoutPromise]);
+        if (result) {
+          return result;
         }
       } catch (_e) {
         // Fallback to file storage if keychain fails to initialize

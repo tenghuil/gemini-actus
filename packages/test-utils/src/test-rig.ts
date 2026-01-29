@@ -11,7 +11,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { env } from 'node:process';
 import { setTimeout as sleep } from 'node:timers/promises';
-import { DEFAULT_GEMINI_MODEL, GEMINI_DIR } from '@google/gemini-cli-core';
+import { DEFAULT_GEMINI_MODEL, GEMINI_DIR } from '@google/gemini-actus-core';
 import fs from 'node:fs';
 import * as pty from '@lydell/node-pty';
 import stripAnsi from 'strip-ansi';
@@ -372,7 +372,7 @@ export class TestRig {
   }
 
   /**
-   * The command and args to use to invoke Gemini CLI. Allows us to switch
+   * The command and args to use to invoke Gemini Actus. Allows us to switch
    * between using the bundled gemini.js (the default) and using the installed
    * 'gemini' (used to verify npm bundles).
    */

@@ -20,7 +20,7 @@ import {
   type ToolConfirmationPayload,
   type ToolCallConfirmationDetails,
   debugLogger,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import type { IndividualToolCallDisplay } from '../types.js';
 
 interface ToolActionsContextValue {

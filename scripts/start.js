@@ -27,20 +27,26 @@ const root = join(__dirname, '..');
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf-8'));
 
 // check build status, write warnings to file for app to display if needed
+console.log('[DEBUG] Running check-build-status...');
 execSync('node ./scripts/check-build-status.js', {
   stdio: 'inherit',
   cwd: root,
 });
+console.log('[DEBUG] check-build-status completed.');
 
 const nodeArgs = [];
 let sandboxCommand = undefined;
 try {
+  console.log('[DEBUG] Running sandbox_command...');
   sandboxCommand = execSync('node scripts/sandbox_command.js', {
     cwd: root,
+    timeout: 1000,
   })
     .toString()
     .trim();
-} catch {
+  console.log('[DEBUG] sandbox_command completed. Result:', sandboxCommand);
+} catch (e) {
+  console.log('[DEBUG] sandbox_command failed/timed out:', e.code || e.message);
   // ignore
 }
 // if debugging is enabled and sandboxing is disabled, use --inspect-brk flag
@@ -71,6 +77,7 @@ if (isInDebugMode) {
   // than the relaunched process making it harder to debug.
   env.GEMINI_CLI_NO_RELAUNCH = 'true';
 }
+console.log('[DEBUG] Spawning child process...');
 const child = spawn('node', nodeArgs, { stdio: 'inherit', env });
 
 child.on('close', (code) => {

@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { persistentState } from '../../utils/persistentState.js';
-import type { Config } from '@google/gemini-cli-core';
+import type { Config } from '@google/gemini-actus-core';
 import crypto from 'node:crypto';
 
 const DEFAULT_MAX_BANNER_SHOWN_COUNT = 5;

@@ -12,11 +12,11 @@ import type {
   RequestContext,
   ExecutionEventBus,
 } from '@a2a-js/sdk/server';
-import type { ToolCallRequestInfo, Config } from '@google/gemini-cli-core';
+import type { ToolCallRequestInfo, Config } from '@google/gemini-actus-core';
 import {
   GeminiEventType,
   SimpleExtensionLoader,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { v4 as uuidv4 } from 'uuid';
 
 import { logger } from '../utils/logger.js';

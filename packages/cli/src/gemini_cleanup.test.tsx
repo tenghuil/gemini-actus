@@ -6,8 +6,8 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { main } from './gemini.js';
-import { debugLogger } from '@google/gemini-cli-core';
-import { type Config } from '@google/gemini-cli-core';
+import { debugLogger } from '@google/gemini-actus-core';
+import { type Config } from '@google/gemini-actus-core';
 
 // Custom error to identify mock process.exit calls
 class MockProcessExitError extends Error {
@@ -17,9 +17,9 @@ class MockProcessExitError extends Error {
   }
 }
 
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
+vi.mock('@google/gemini-actus-core', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+    await importOriginal<typeof import('@google/gemini-actus-core')>();
   return {
     ...actual,
     writeToStdout: vi.fn(),

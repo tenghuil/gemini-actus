@@ -13,7 +13,10 @@ import { ToolGroupMessage } from './ToolGroupMessage.js';
 import type { IndividualToolCallDisplay } from '../../types.js';
 import { ToolCallStatus } from '../../types.js';
 import { Scrollable } from '../shared/Scrollable.js';
-import { ASK_USER_DISPLAY_NAME, makeFakeConfig } from '@google/gemini-cli-core';
+import {
+  ASK_USER_DISPLAY_NAME,
+  makeFakeConfig,
+} from '@google/gemini-actus-core';
 import os from 'node:os';
 
 describe('<ToolGroupMessage />', () => {

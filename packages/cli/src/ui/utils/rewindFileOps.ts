@@ -7,7 +7,7 @@
 import type {
   ConversationRecord,
   MessageRecord,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import fs from 'node:fs/promises';
 import * as Diff from 'diff';
 import {
@@ -15,7 +15,7 @@ import {
   debugLogger,
   getFileDiffFromResultDisplay,
   computeAddedAndRemovedLines,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 
 export interface FileChangeDetail {
   fileName: string;

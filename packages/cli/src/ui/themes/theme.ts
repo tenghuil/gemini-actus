@@ -14,7 +14,7 @@ import {
   getThemeTypeFromBackgroundColor,
 } from './color-utils.js';
 
-import type { CustomTheme } from '@google/gemini-cli-core';
+import type { CustomTheme } from '@google/gemini-actus-core';
 
 export type { CustomTheme };
 

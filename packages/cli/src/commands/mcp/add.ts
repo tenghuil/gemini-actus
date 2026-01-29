@@ -7,7 +7,7 @@
 // File for 'gemini mcp add' command
 import type { CommandModule } from 'yargs';
 import { loadSettings, SettingScope } from '../../config/settings.js';
-import { debugLogger, type MCPServerConfig } from '@google/gemini-cli-core';
+import { debugLogger, type MCPServerConfig } from '@google/gemini-actus-core';
 import { exitCli } from '../utils.js';
 
 async function addMcpServer(
@@ -131,7 +131,7 @@ async function addMcpServer(
   if (transport === 'stdio') {
     debugLogger.warn(
       'Security Warning: Running MCP servers with stdio transport can expose inherited environment variables. ' +
-        'While the Gemini CLI redacts common API keys and secrets by default, you should only run servers from trusted sources.',
+        'While the Gemini Actus redacts common API keys and secrets by default, you should only run servers from trusted sources.',
     );
   }
 

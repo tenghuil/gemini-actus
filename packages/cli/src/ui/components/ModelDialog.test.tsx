@@ -16,16 +16,16 @@ import {
   DEFAULT_GEMINI_FLASH_LITE_MODEL,
   PREVIEW_GEMINI_MODEL,
   PREVIEW_GEMINI_MODEL_AUTO,
-} from '@google/gemini-cli-core';
-import type { Config, ModelSlashCommandEvent } from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
+import type { Config, ModelSlashCommandEvent } from '@google/gemini-actus-core';
 
 // Mock dependencies
 const mockGetDisplayString = vi.fn();
 const mockLogModelSlashCommand = vi.fn();
 const mockModelSlashCommandEvent = vi.fn();
 
-vi.mock('@google/gemini-cli-core', async () => {
-  const actual = await vi.importActual('@google/gemini-cli-core');
+vi.mock('@google/gemini-actus-core', async () => {
+  const actual = await vi.importActual('@google/gemini-actus-core');
   return {
     ...actual,
     getDisplayString: (val: string) => mockGetDisplayString(val),

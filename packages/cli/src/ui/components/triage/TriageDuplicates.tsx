@@ -7,8 +7,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Box, Text } from 'ink';
 import Spinner from 'ink-spinner';
-import type { Config } from '@google/gemini-cli-core';
-import { debugLogger, spawnAsync } from '@google/gemini-cli-core';
+import type { Config } from '@google/gemini-actus-core';
+import { debugLogger, spawnAsync } from '@google/gemini-actus-core';
 import { useKeypress } from '../../hooks/useKeypress.js';
 import { keyMatchers, Command } from '../../keyMatchers.js';
 

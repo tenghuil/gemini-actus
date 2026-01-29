@@ -1,7 +1,7 @@
 {
-  "name": "gemini-cli-vscode-ide-companion",
-  "displayName": "Gemini CLI Companion",
-  "description": "Enable Gemini CLI with direct access to your IDE workspace.",
+  "name": "gemini-actus-vscode-ide-companion",
+  "displayName": "Gemini Actus Companion",
+  "description": "Enable Gemini Actus with direct access to your IDE workspace.",
   "version": "0.28.0-nightly.20260128.adc8e11bb",
   "publisher": "google",
   "icon": "assets/icon.png",
@@ -19,8 +19,8 @@
     "AI"
   ],
   "keywords": [
-    "gemini-cli",
-    "gemini cli",
+    "gemini-actus",
+    "gemini actus",
     "gemini",
     "gemini code",
     "cli",
@@ -32,12 +32,12 @@
   ],
   "contributes": {
     "configuration": {
-      "title": "Gemini CLI",
+      "title": "Gemini Actus",
       "properties": {
         "gemini-cli.debug.logging.enabled": {
           "type": "boolean",
           "default": false,
-          "description": "Enable detailed logging for debugging the Gemini CLI Companion."
+          "description": "Enable detailed logging for debugging the Gemini Actus Companion."
         }
       }
     },
@@ -49,21 +49,21 @@
     "commands": [
       {
         "command": "gemini.diff.accept",
-        "title": "Gemini CLI: Accept Diff",
+        "title": "Gemini Actus: Accept Diff",
         "icon": "$(check)"
       },
       {
         "command": "gemini.diff.cancel",
-        "title": "Gemini CLI: Close Diff Editor",
+        "title": "Gemini Actus: Close Diff Editor",
         "icon": "$(close)"
       },
       {
         "command": "gemini-cli.runGeminiCLI",
-        "title": "Gemini CLI: Run"
+        "title": "Gemini Actus: Run"
       },
       {
         "command": "gemini-cli.showNotices",
-        "title": "Gemini CLI: View Third-Party Notices"
+        "title": "Gemini Actus: View Third-Party Notices"
       }
     ],
     "menus": {

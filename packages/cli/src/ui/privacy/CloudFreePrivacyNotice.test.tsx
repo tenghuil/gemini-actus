@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { CloudFreePrivacyNotice } from './CloudFreePrivacyNotice.js';
 import { usePrivacySettings } from '../hooks/usePrivacySettings.js';
 import { useKeypress } from '../hooks/useKeypress.js';
-import type { Config } from '@google/gemini-cli-core';
+import type { Config } from '@google/gemini-actus-core';
 import { RadioButtonSelect } from '../components/shared/RadioButtonSelect.js';
 
 // Mocks

@@ -66,6 +66,10 @@ export class Storage {
     return path.join(Storage.getGlobalGeminiDir(), 'agents');
   }
 
+  static getSubagentsDir(): string {
+    return path.join(Storage.getGlobalGeminiDir(), 'subagents');
+  }
+
   static getAcknowledgedAgentsPath(): string {
     return path.join(
       Storage.getGlobalGeminiDir(),

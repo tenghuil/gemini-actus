@@ -9,7 +9,7 @@ import {
   listMemoryFiles,
   refreshMemory,
   showMemory,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import type {
   Command,
   CommandContext,

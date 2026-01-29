@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Config } from '@google/gemini-cli-core';
+import type { Config } from '@google/gemini-actus-core';
 import {
   GeminiEventType,
   ApprovalMode,
   type ToolCallConfirmationDetails,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import type {
   TaskStatusUpdateEvent,
   SendStreamingMessageSuccessResponse,
@@ -36,7 +36,7 @@ import {
   createMockConfig,
 } from '../utils/testing_utils.js';
 // Import MockTool from specific path to avoid vitest dependency in main core bundle
-import { MockTool } from '@google/gemini-cli-core/src/test-utils/mock-tool.js';
+import { MockTool } from '@google/gemini-actus-core/src/test-utils/mock-tool.js';
 import type { Command, CommandContext } from '../commands/types.js';
 
 const mockToolConfirmationFn = async () =>
@@ -89,8 +89,8 @@ vi.mock('../config/config.js', async () => {
 
 // Mock the GeminiClient to avoid actual API calls
 const sendMessageStreamSpy = vi.fn();
-vi.mock('@google/gemini-cli-core', async () => {
-  const actual = await vi.importActual('@google/gemini-cli-core');
+vi.mock('@google/gemini-actus-core', async () => {
+  const actual = await vi.importActual('@google/gemini-actus-core');
   return {
     ...actual,
     GeminiClient: vi.fn().mockImplementation(() => ({

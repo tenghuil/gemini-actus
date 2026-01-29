@@ -9,7 +9,7 @@ import {
   listMemoryFiles,
   refreshMemory,
   showMemory,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   AddMemoryCommand,
@@ -23,12 +23,12 @@ import type {
   AnyDeclarativeTool,
   Config,
   ToolRegistry,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 
 // Mock the core functions
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
+vi.mock('@google/gemini-actus-core', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+    await importOriginal<typeof import('@google/gemini-actus-core')>();
   return {
     ...actual,
     showMemory: vi.fn(),

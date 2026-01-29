@@ -11,7 +11,7 @@ import type {
 } from '../types.js';
 import { MessageType } from '../types.js';
 import { formatDuration } from '../utils/formatters.js';
-import { UserAccountManager } from '@google/gemini-cli-core';
+import { UserAccountManager } from '@google/gemini-actus-core';
 import {
   type CommandContext,
   type SlashCommand,

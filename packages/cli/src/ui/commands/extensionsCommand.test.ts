@@ -7,7 +7,7 @@
 import type {
   ExtensionLoader,
   GeminiCLIExtension,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { createMockCommandContext } from '../../test-utils/mockCommandContext.js';
 import { MessageType } from '../types.js';
 import {

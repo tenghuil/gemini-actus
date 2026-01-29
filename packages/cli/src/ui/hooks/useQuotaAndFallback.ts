@@ -17,7 +17,7 @@ import {
   PREVIEW_GEMINI_MODEL,
   DEFAULT_GEMINI_MODEL,
   VALID_GEMINI_MODELS,
-} from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { type UseHistoryManagerReturn } from './useHistoryManager.js';
 import { MessageType } from '../types.js';

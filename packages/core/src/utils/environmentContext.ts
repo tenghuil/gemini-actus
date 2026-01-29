@@ -65,7 +65,7 @@ export async function getEnvironmentContext(config: Config): Promise<Part[]> {
   const environmentMemory = config.getEnvironmentMemory();
 
   const context = `
-This is the Gemini CLI. We are setting up the context for our chat.
+This is the Gemini Actus. We are setting up the context for our chat.
 Today's date is ${today} (formatted according to the user's locale).
 My operating system is: ${platform}
 The project's temporary directory is: ${tempDir}

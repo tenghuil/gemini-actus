@@ -18,8 +18,8 @@ import type {
   ValidatingToolCall,
   WaitingToolCall,
   CancelledToolCall,
-} from '@google/gemini-cli-core';
-import { CoreToolScheduler } from '@google/gemini-cli-core';
+} from '@google/gemini-actus-core';
+import { CoreToolScheduler } from '@google/gemini-actus-core';
 import { useCallback, useState, useMemo, useEffect, useRef } from 'react';
 
 export type ScheduleFn = (

@@ -60,6 +60,8 @@ import { shouldAttemptBrowserLaunch } from '../utils/browser.js';
 import type { MCPOAuthConfig } from '../mcp/oauth-provider.js';
 import { ideContextStore } from '../ide/ideContext.js';
 import { WriteTodosTool } from '../tools/write-todos.js';
+import { BrowserTool } from '../tools/browser-tool.js';
+import { CompleteTaskTool } from '../tools/complete-task.js';
 import type { FileSystemService } from '../services/fileSystemService.js';
 import { StandardFileSystemService } from '../services/fileSystemService.js';
 import { logRipgrepFallback, logFlashFallback } from '../telemetry/loggers.js';
@@ -2133,6 +2135,8 @@ export class Config {
     if (this.getUseWriteTodos()) {
       registerCoreTool(WriteTodosTool);
     }
+    registerCoreTool(BrowserTool);
+    registerCoreTool(CompleteTaskTool);
 
     // Register Subagents as Tools
     this.registerSubAgentTools(registry);

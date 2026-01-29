@@ -5,7 +5,7 @@
  */
 
 import { Box, Text } from 'ink';
-import { type AgentDefinition } from '@google/gemini-cli-core';
+import { type AgentDefinition } from '@google/gemini-actus-core';
 import { theme } from '../semantic-colors.js';
 import {
   RadioButtonSelect,

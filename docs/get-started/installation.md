@@ -21,7 +21,7 @@ downloading the Gemini CLI package from the NPM registry.
 - **Global install:**
 
   ```bash
-  npm install -g @google/gemini-cli
+  npm install -g @google/gemini-actus
   ```
 
   Then, run the CLI from anywhere:
@@ -34,7 +34,7 @@ downloading the Gemini CLI package from the NPM registry.
 
   ```bash
   # Execute the latest version from NPM without a global install
-  npx @google/gemini-cli
+  npx @google/gemini-actus
   ```
 
 ### 2. Run in a sandbox (Docker/Podman)
@@ -101,8 +101,8 @@ architectural components and processes:
 Gemini CLI project is a monorepo that publishes two core packages to the NPM
 registry:
 
-- `@google/gemini-cli-core`: The backend, handling logic and tool execution.
-- `@google/gemini-cli`: The user-facing frontend.
+- `@google/gemini-actus-core`: The backend, handling logic and tool execution.
+- `@google/gemini-actus`: The user-facing frontend.
 
 These packages are used when performing the standard installation and when
 running Gemini CLI from the source.
@@ -113,8 +113,8 @@ There are two distinct build processes used, depending on the distribution
 channel:
 
 - **NPM publication:** For publishing to the NPM registry, the TypeScript source
-  code in `@google/gemini-cli-core` and `@google/gemini-cli` is transpiled into
-  standard JavaScript using the TypeScript Compiler (`tsc`). The resulting
+  code in `@google/gemini-actus-core` and `@google/gemini-actus` is transpiled
+  into standard JavaScript using the TypeScript Compiler (`tsc`). The resulting
   `dist/` directory is what gets published in the NPM package. This is a
   standard approach for TypeScript libraries.
 

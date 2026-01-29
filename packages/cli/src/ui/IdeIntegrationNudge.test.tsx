@@ -9,14 +9,14 @@ import { render } from '../test-utils/render.js';
 import { act } from 'react';
 import { IdeIntegrationNudge } from './IdeIntegrationNudge.js';
 import { KeypressProvider } from './contexts/KeypressContext.js';
-import { debugLogger } from '@google/gemini-cli-core';
+import { debugLogger } from '@google/gemini-actus-core';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Mock debugLogger
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
+vi.mock('@google/gemini-actus-core', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+    await importOriginal<typeof import('@google/gemini-actus-core')>();
   return {
     ...actual,
     debugLogger: {
@@ -66,7 +66,7 @@ describe('IdeIntegrationNudge', () => {
     });
     const frame = lastFrame();
 
-    expect(frame).toContain('Do you want to connect VS Code to Gemini CLI?');
+    expect(frame).toContain('Do you want to connect VS Code to Gemini Actus?');
     expect(frame).toContain('Yes');
     expect(frame).toContain('No (esc)');
     expect(frame).toContain("No, don't ask again");
