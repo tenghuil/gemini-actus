@@ -12,7 +12,7 @@ import * as chromeLauncher from 'chrome-launcher';
 import { debugLogger } from '../utils/debugLogger.js';
 import { getErrorMessage } from '../utils/errors.js';
 import { ToolErrorType } from './tool-error.js';
-import { shouldAttemptBrowserLaunch } from '../utils/browser.js';
+// import { shouldAttemptBrowserLaunch } from '../utils/browser.js';
 
 interface BrowserToolParams {
   action:
@@ -71,11 +71,11 @@ class BrowserManager {
   async launchBrowser() {
     await this.close(); // Ensure clean state
 
-    const isHeadless = !shouldAttemptBrowserLaunch();
+    const isHeadless = false; // Forced headful for verification
     const chromeFlags = ['--no-sandbox', '--disable-gpu'];
-    if (isHeadless) {
-      chromeFlags.push('--headless');
-    }
+    // if (isHeadless) {
+    //   chromeFlags.push('--headless');
+    // }
 
     // Find Chrome
     this.chrome = await chromeLauncher.launch({

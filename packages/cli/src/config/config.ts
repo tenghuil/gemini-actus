@@ -11,6 +11,7 @@ import { mcpCommand } from '../commands/mcp.js';
 import { extensionsCommand } from '../commands/extensions.js';
 import { skillsCommand } from '../commands/skills.js';
 import { hooksCommand } from '../commands/hooks.js';
+import { webCommand } from '../commands/web.js';
 import {
   Config,
   setGeminiMdFilename as setServerGeminiMdFilename,
@@ -311,6 +312,7 @@ export async function parseArguments(
   if (settings.tools?.enableHooks) {
     yargsInstance.command(hooksCommand);
   }
+  yargsInstance.command(webCommand);
 
   yargsInstance
     .version(await getVersion()) // This will enable the --version flag based on package.json

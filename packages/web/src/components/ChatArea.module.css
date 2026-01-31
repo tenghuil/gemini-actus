@@ -1,0 +1,101 @@
+.chatArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 0 120px 0; /* Space for input area */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.landing {
+  justify-content: center;
+  height: 100%;
+  padding-bottom: 0;
+}
+
+.messagesList {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: var(--content-width);
+  width: 100%;
+  padding: 24px;
+}
+
+.messageRow {
+  display: flex;
+  gap: 16px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.userRow {
+  justify-content: flex-end;
+}
+
+.modelRow {
+  justify-content: flex-start;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-top: 2px;
+}
+
+.modelAvatar {
+  color: var(--accent-color);
+}
+
+.bubble {
+  padding: 12px 20px;
+  border-radius: 18px;
+  max-width: 100%;
+}
+
+.userBubble {
+  background-color: var(--user-bubble);
+  border-radius: 20px 20px 4px 20px;
+  max-width: 80%;
+  color: var(--text-color);
+}
+
+.modelBubble {
+  background-color: transparent;
+  padding-left: 0;
+  padding-top: 0;
+  width: 100%;
+}
+
+.emptyState {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 56px;
+  font-weight: 500;
+  letter-spacing: -1.5px;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #4285f4, #d96570);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.1;
+}
+
+.subtitle {
+  font-size: 56px;
+  font-weight: 500;
+  letter-spacing: -1.5px;
+  margin: 0;
+  color: #c4c7c5;
+  line-height: 1.1;
+}

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import * as os from 'node:os';
 import type { ConfigParameters } from '../config/config.js';
 import { Config } from '../config/config.js';
 
@@ -16,8 +17,8 @@ export const DEFAULT_CONFIG_PARAMETERS: ConfigParameters = {
   sessionId: 'test-session-id',
   proxy: undefined,
   model: 'gemini-9001-super-duper',
-  targetDir: '/',
-  cwd: '/',
+  targetDir: os.tmpdir(),
+  cwd: os.tmpdir(),
 };
 
 /**

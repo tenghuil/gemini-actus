@@ -1,0 +1,110 @@
+.sidebar {
+  width: 280px;
+  background-color: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  height: 100vh;
+  border-right: 1px solid transparent;
+  transition: transform 0.3s ease, margin-left 0.3s ease;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 50;
+}
+
+.sidebar.closed {
+  transform: translateX(-100%);
+  margin-left: -280px; /* Pull layout if static, but usually fixed overlay or push */
+}
+
+/* For mobile mainly, or collapsible desktop */
+/* If we want push sidebar on desktop, we might need layout adjustment in parent */
+
+.menuBtn {
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--secondary-text);
+  transition: background-color 0.2s;
+  border: none;
+  background: transparent;
+  margin-bottom: 20px;
+}
+
+.menuBtn:hover {
+  background-color: var(--sidebar-item-hover);
+  color: var(--text-color);
+}
+
+.newChatBtn {
+  background-color: #e8eaed;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 16px;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  color: #1f1f1f;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  margin-bottom: 24px;
+}
+
+.newChatBtn:hover {
+  background-color: #dbeafe;
+  color: var(--accent-color);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.section {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sectionTitle {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 12px;
+  color: var(--secondary-text);
+  margin-bottom: 4px;
+}
+
+.item {
+  padding: 10px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-color);
+  transition: background-color 0.15s ease;
+  margin-bottom: 2px;
+}
+
+.item:hover {
+  background-color: var(--sidebar-item-hover);
+}
+
+.item.active {
+  background-color: var(--accent-light);
+  color: var(--accent-text);
+  font-weight: 500;
+}
+
+.footer {
+  margin-top: auto;
+  padding-top: 16px;
+}

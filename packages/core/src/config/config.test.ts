@@ -54,6 +54,7 @@ vi.mock('fs', async (importOriginal) => {
       isDirectory: vi.fn().mockReturnValue(true),
     }),
     realpathSync: vi.fn((path) => path),
+    mkdirSync: vi.fn(),
   };
 });
 
@@ -582,7 +583,26 @@ describe('Server Config (config.ts)', () => {
 
     expect(config.getUserMemory()).toBe(USER_MEMORY);
     // Verify other getters if needed
-    expect(config.getTargetDir()).toBe(path.resolve(TARGET_DIR)); // Check resolved path
+  });
+
+  it('Config constructor should create session-based workspace', () => {
+    const config = new Config(baseParams);
+    const resolvedTargetDir = path.resolve(TARGET_DIR);
+    const expectedSessionDir = path.join(
+      resolvedTargetDir,
+      '.workspace',
+      SESSION_ID,
+    );
+
+    expect(config.getTargetDir()).toBe(expectedSessionDir);
+    expect(fs.mkdirSync).toHaveBeenCalledWith(expectedSessionDir, {
+      recursive: true,
+    });
+
+    // Check workspace context includes both session dir and project root
+    const directories = config.getWorkspaceContext().getDirectories();
+    expect(directories).toContain(expectedSessionDir);
+    expect(directories).toContain(resolvedTargetDir);
   });
 
   it('Config constructor should default userMemory to empty string if not provided', () => {
@@ -660,12 +680,16 @@ describe('Server Config (config.ts)', () => {
     const workspaceContext = config.getWorkspaceContext();
     const directories = workspaceContext.getDirectories();
 
-    // Should include only the target directory initially
-    expect(directories).toHaveLength(1);
+    // Should include the target directory (session) and project root initially
+    expect(directories).toHaveLength(2);
     expect(directories).toContain(path.resolve(baseParams.targetDir));
+    expect(directories).toContain(config.getTargetDir());
 
     // The other directories should be in the pending list
-    expect(config.getPendingIncludeDirectories()).toEqual(includeDirectories);
+    expect(config.getPendingIncludeDirectories()).toEqual([
+      path.resolve(baseParams.targetDir),
+      ...includeDirectories,
+    ]);
   });
 
   it('Config constructor should set telemetry to true when provided as true', () => {

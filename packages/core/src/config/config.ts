@@ -61,6 +61,7 @@ import type { MCPOAuthConfig } from '../mcp/oauth-provider.js';
 import { ideContextStore } from '../ide/ideContext.js';
 import { WriteTodosTool } from '../tools/write-todos.js';
 import { BrowserTool } from '../tools/browser-tool.js';
+import { PreviewTool } from '../tools/preview-tool.js';
 import { CompleteTaskTool } from '../tools/complete-task.js';
 import type { FileSystemService } from '../services/fileSystemService.js';
 import { StandardFileSystemService } from '../services/fileSystemService.js';
@@ -633,10 +634,30 @@ export class Config {
       params.embeddingModel ?? DEFAULT_GEMINI_EMBEDDING_MODEL;
     this.fileSystemService = new StandardFileSystemService();
     this.sandbox = params.sandbox;
-    this.targetDir = path.resolve(params.targetDir);
+    const projectRoot = path.resolve(params.targetDir);
+
+    // Create session-specific workspace directory
+    const sessionDir = path.join(projectRoot, '.workspace', params.sessionId);
+    try {
+      fs.mkdirSync(sessionDir, { recursive: true });
+    } catch (e) {
+      // failed to create session directory, fallback to project root?
+      // Or just let it fail? If we can't create it, we probably can't do much.
+      // We will log and throw for now, or maybe just proceed if it already exists (mkdirSync with recursive handles existence)
+      // But if it fails due to permissions, we might have issues.
+      // eslint-disable-next-line no-console
+      console.error(`Failed to create session directory: ${sessionDir}`, e);
+    }
+
+    this.targetDir = sessionDir;
     this.folderTrust = params.folderTrust ?? false;
-    this.workspaceContext = new WorkspaceContext(this.targetDir, []);
-    this.pendingIncludeDirectories = params.includeDirectories ?? [];
+
+    // Add project root to the workspace context so files are accessible
+    this.workspaceContext = new WorkspaceContext(this.targetDir, [projectRoot]);
+    this.pendingIncludeDirectories = [
+      projectRoot,
+      ...(params.includeDirectories ?? []),
+    ];
     this.debugMode = params.debugMode;
     this.question = params.question;
 
@@ -2143,6 +2164,11 @@ export class Config {
 
     await registry.discoverAllTools();
     registry.sortTools();
+    if (this.previewFeatures) {
+      // Add preview-related tools here
+      registry.registerTool(new PreviewTool(this.messageBus));
+    }
+
     return registry;
   }
 

@@ -1,0 +1,82 @@
+npm warn Unknown builtin config "globalignorefile". This will stop working in the next major version of npm.
+
+> @google/gemini-actus@0.28.0-nightly.20260128.adc8e11bb lint
+> eslint . --ext .ts,.tsx
+
+
+/usr/local/google/home/tenghuil/project/gemini-actus/packages/cli/src/commands/web-routes.ts
+   1:1   error  No header found                                                           headers/header-format
+   1:1   error  All imports in the declaration are only used as types. Use `import type`  @typescript-eslint/consistent-type-imports
+   2:18  error  Prefer `node:path` over `path`                                            import/enforce-node-protocol-usage
+   5:27  error  Prefer `node:fs/promises` over `fs/promises`                              import/enforce-node-protocol-usage
+  32:53  error  Unexpected any. Specify a different type                                  @typescript-eslint/no-explicit-any
+
+/usr/local/google/home/tenghuil/project/gemini-actus/packages/cli/src/commands/web.file-system.test.ts
+   1:1   error  No header found                                                                                                            headers/header-format
+   2:1   error  All imports in the declaration are only used as types. Use `import type`                                                   @typescript-eslint/consistent-type-imports
+   4:18  error  Prefer `node:path` over `path`                                                                                             import/enforce-node-protocol-usage
+  13:36  error  Unexpected block statement surrounding arrow body; parenthesize the returned value and move it immediately after the `=>`  arrow-body-style
+  30:16  error  Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  31:16  error  Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  32:17  error  Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  33:32  error  The `Function` type accepts any function-like value.
+Prefer explicitly defining any function parameters and return type    @typescript-eslint/no-unsafe-function-type
+  54:10  error  Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+
+/usr/local/google/home/tenghuil/project/gemini-actus/packages/cli/src/commands/web.ts
+    2:1   error    No header found                                                                                                                                                     headers/header-format
+    5:18  error    Prefer `node:path` over `path`                                                                                                                                      import/enforce-node-protocol-usage
+    6:30  error    Prefer `node:http` over `http`                                                                                                                                      import/enforce-node-protocol-usage
+    8:29  warning  '/usr/local/google/home/tenghuil/project/gemini-actus/node_modules/@google/gemini-actus-core/dist/index.js' imported multiple times                                 import/no-duplicates
+    9:31  error    Prefer `node:module` over `module`                                                                                                                                  import/enforce-node-protocol-usage
+   14:1   error    All imports in the declaration are only used as types. Use `import type`                                                                                            @typescript-eslint/consistent-type-imports
+   14:38  warning  '/usr/local/google/home/tenghuil/project/gemini-actus/node_modules/@google/gemini-actus-core/dist/index.js' imported multiple times                                 import/no-duplicates
+   23:23  error    Unexpected block statement surrounding arrow body; move the returned value immediately after the `=>`                                                               arrow-body-style
+   67:12  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+   80:31  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+   81:23  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+   82:20  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  107:5   error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  209:14  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  222:11  error    'toolCalls' is never reassigned. Use 'const' instead                                                                                                                prefer-const
+  228:19  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  240:42  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  240:74  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  286:68  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  323:16  error    'e' is defined but never used. Allowed unused caught errors must match /^_/u                                                                                        @typescript-eslint/no-unused-vars
+  342:7   error    Unexpected console statement                                                                                                                                        no-console
+
+/usr/local/google/home/tenghuil/project/gemini-actus/packages/cli/src/utils/history.test.ts
+   2:1   error  No header found                               headers/header-format
+   4:16  error  Prefer `node:fs/promises` over `fs/promises`  import/enforce-node-protocol-usage
+   5:18  error  Prefer `node:path` over `path`                import/enforce-node-protocol-usage
+  16:18  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  17:22  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  18:21  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  19:20  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  20:15  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  64:21  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  78:20  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  84:21  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+
+/usr/local/google/home/tenghuil/project/gemini-actus/packages/cli/src/utils/history.ts
+   2:1   error  No header found                                                               headers/header-format
+   2:16  error  Prefer `node:fs/promises` over `fs/promises`                                  import/enforce-node-protocol-usage
+   3:18  error  Prefer `node:path` over `path`                                                import/enforce-node-protocol-usage
+  53:22  error  'e' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  62:17  error  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+  76:17  error  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+
+✖ 52 problems (50 errors, 2 warnings)
+  21 errors and 0 warnings potentially fixable with the `--fix` option.
+
+npm error Lifecycle script `lint` failed with error:
+npm error code 1
+npm error path /usr/local/google/home/tenghuil/project/gemini-actus/packages/cli
+npm error workspace @google/gemini-actus@0.28.0-nightly.20260128.adc8e11bb
+npm error location /usr/local/google/home/tenghuil/project/gemini-actus/packages/cli
+npm error command failed
+npm error command sh -c eslint . --ext .ts,.tsx
+*** gpkg: This tool is configured to use Corp Airlock for package installs: http://go/corp-airlock
+*** gpkg: If Corp Airlock is breaking your workflow please report at: http://go/corp-airlock-feedback
+*** gpkg: Exceptions are available: http://go/corp-airlock#request-exception

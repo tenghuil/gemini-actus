@@ -471,7 +471,7 @@ To disable gemini-3-pro-preview, disable "Preview features" in /settings.`,
       const lastCall = (mockHistoryManager.addItem as Mock).mock.calls[0][0];
       expect(lastCall.type).toBe(MessageType.INFO);
       expect(lastCall.text).toContain(
-        `Switched to fallback model gemini-2.5-pro`,
+        `Switched to fallback model ${DEFAULT_GEMINI_MODEL}`,
       );
     });
 
@@ -507,7 +507,7 @@ To disable gemini-3-pro-preview, disable "Preview features" in /settings.`,
       const lastCall = (mockHistoryManager.addItem as Mock).mock.calls[0][0];
       expect(lastCall.type).toBe(MessageType.INFO);
       expect(lastCall.text).toContain(
-        `Switched to fallback model gemini-2.5-flash`,
+        `Switched to fallback model ${DEFAULT_GEMINI_FLASH_MODEL}`,
       );
     });
   });
