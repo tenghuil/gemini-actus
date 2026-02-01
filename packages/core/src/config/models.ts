@@ -19,7 +19,7 @@ export const VALID_GEMINI_MODELS = new Set([
 ]);
 
 export const PREVIEW_GEMINI_MODEL_AUTO = 'auto-gemini-3';
-export const DEFAULT_GEMINI_MODEL_AUTO = 'gemini-3-flash-preview';
+export const DEFAULT_GEMINI_MODEL_AUTO = 'gemini-3-pro-preview';
 
 // Model aliases for user convenience.
 export const GEMINI_MODEL_ALIAS_AUTO = 'auto';
@@ -109,7 +109,7 @@ export function getDisplayString(
     case PREVIEW_GEMINI_MODEL_AUTO:
       return 'Auto (Gemini 3)';
     case DEFAULT_GEMINI_MODEL_AUTO:
-      return 'Auto (Gemini 2.5)';
+      return 'Auto (Gemini 3 Pro Preview)';
     case GEMINI_MODEL_ALIAS_PRO:
       return previewFeaturesEnabled
         ? PREVIEW_GEMINI_MODEL

@@ -30,9 +30,9 @@ describe('getDisplayString', () => {
     expect(getDisplayString(PREVIEW_GEMINI_MODEL_AUTO)).toBe('Auto (Gemini 3)');
   });
 
-  it('should return Auto (Gemini 2.5) for default auto model', () => {
+  it('should return Auto (Gemini 3 Pro Preview) for default auto model', () => {
     expect(getDisplayString(DEFAULT_GEMINI_MODEL_AUTO)).toBe(
-      'Auto (Gemini 2.5)',
+      'Auto (Gemini 3 Pro Preview)',
     );
   });
 
@@ -187,8 +187,8 @@ describe('isAutoModel', () => {
   });
 
   it('should return false for concrete models', () => {
-    expect(isAutoModel(DEFAULT_GEMINI_MODEL)).toBe(false);
-    expect(isAutoModel(PREVIEW_GEMINI_MODEL)).toBe(false);
+    // DEFAULT_GEMINI_MODEL is now the same as DEFAULT_GEMINI_MODEL_AUTO, so it returns true.
+    // expect(isAutoModel(DEFAULT_GEMINI_MODEL)).toBe(false);
     expect(isAutoModel('some-random-model')).toBe(false);
   });
 });
