@@ -13,7 +13,7 @@ import type { ModelAvailabilityService } from '../../availability/modelAvailabil
 import {
   DEFAULT_GEMINI_MODEL,
   DEFAULT_GEMINI_FLASH_MODEL,
-  DEFAULT_GEMINI_MODEL_AUTO,
+  GEMINI_MODEL_ALIAS_AUTO,
 } from '../../config/models.js';
 import { selectModelForAvailability } from '../../availability/policyHelpers.js';
 
@@ -100,7 +100,7 @@ describe('FallbackStrategy', () => {
   it('should correctly handle "auto" alias by resolving it before checking availability', async () => {
     // Mock snapshot to return available for the RESOLVED model
     vi.mocked(mockService.snapshot).mockReturnValue({ available: true });
-    vi.mocked(mockConfig.getModel).mockReturnValue(DEFAULT_GEMINI_MODEL_AUTO);
+    vi.mocked(mockConfig.getModel).mockReturnValue(GEMINI_MODEL_ALIAS_AUTO);
 
     const decision = await strategy.route(mockContext, mockConfig, mockClient);
 

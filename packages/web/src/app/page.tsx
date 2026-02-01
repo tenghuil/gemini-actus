@@ -29,6 +29,8 @@ export default function Home() {
     fetchHistory,
     activePreviewUrl,
     setActivePreviewUrl,
+    lastTouchedFile,
+    isTaskFinished,
   } = useChat();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -39,12 +41,12 @@ export default function Home() {
     void fetchHistory();
   }, [fetchHistory]);
 
-  // Auto-open Canvas when a preview is active
+  // Auto-open Canvas when a task is finished and a preview or file is active
   useEffect(() => {
-    if (activePreviewUrl) {
+    if (isTaskFinished && (activePreviewUrl || lastTouchedFile)) {
       setIsCanvasOpen(true);
     }
-  }, [activePreviewUrl]);
+  }, [isTaskFinished, activePreviewUrl, lastTouchedFile]);
 
   // Resize logic
   const [canvasWidth, setCanvasWidth] = useState(600);
@@ -181,6 +183,7 @@ export default function Home() {
                   previewUrl={activePreviewUrl}
                   chatId={currentChatId || undefined}
                   onPreviewUrlChange={setActivePreviewUrl}
+                  lastTouchedFile={lastTouchedFile}
                 />
               </div>
             </>

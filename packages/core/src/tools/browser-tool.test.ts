@@ -9,6 +9,7 @@ import { BrowserTool } from './browser-tool.js';
 import type { MessageBus } from '../confirmation-bus/message-bus.js';
 import puppeteer from 'puppeteer-core';
 import * as chromeLauncher from 'chrome-launcher';
+import type { Config } from '../config/config.js';
 
 vi.mock('puppeteer-core');
 vi.mock('chrome-launcher');
@@ -62,7 +63,10 @@ describe('BrowserTool', () => {
       mockChrome as chromeLauncher.LaunchedChrome,
     );
 
-    tool = new BrowserTool(messageBus);
+    const config = {
+      getTargetDir: vi.fn().mockReturnValue('/mock/dir'),
+    } as unknown as Config;
+    tool = new BrowserTool(config, messageBus);
   });
 
   it('should launch browser and open url', async () => {
@@ -71,7 +75,16 @@ describe('BrowserTool', () => {
       new AbortController().signal,
     );
 
-    expect(chromeLauncher.launch).toHaveBeenCalled();
+    expect(chromeLauncher.launch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chromeFlags: expect.arrayContaining([
+          '--no-sandbox',
+          '--disable-gpu',
+          '--allow-insecure-localhost',
+          '--disable-web-security',
+        ]),
+      }),
+    );
     expect(puppeteer.connect).toHaveBeenCalled();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((mockPage as any).goto).toHaveBeenCalledWith('https://example.com', {

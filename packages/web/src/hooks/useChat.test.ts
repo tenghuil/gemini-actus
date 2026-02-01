@@ -102,4 +102,93 @@ describe('useChat', () => {
     expect(finalMsg.role).toBe('model');
     expect(finalMsg.text).toBe('Hello World');
   });
+
+  it('should set isTaskFinished to true when receiving finish event', async () => {
+    const { result } = renderHook(() => useChat());
+
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(
+          new TextEncoder().encode(
+            'event: chunk\ndata: {"type": "chunk", "value": {"candidates": [{"content": {"parts": [{"text": "Done"}]}}]}}\n\n',
+          ),
+        );
+        controller.enqueue(
+          new TextEncoder().encode(
+            'event: finish\ndata: {"success": true}\n\n',
+          ),
+        );
+        controller.close();
+      },
+    });
+
+    fetchMock.mockImplementation((url) => {
+      if (url === '/api/chat') {
+        return Promise.resolve({
+          ok: true,
+          body: stream,
+          getReader: () => stream.getReader(),
+        });
+      }
+      return Promise.resolve({ ok: true, json: async () => [] });
+    });
+
+    await act(async () => {
+      await result.current.sendMessage('test');
+    });
+
+    await waitFor(() => {
+      expect(result.current.isTaskFinished).toBe(true);
+    });
+  });
+
+  it('should set activePreviewUrl when replace tool ends (new file) using args', async () => {
+    const { result } = renderHook(() => useChat());
+
+    const chatId = 'test-chat-id';
+    const filePath = 'index.html'; // Relative path in args
+
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(
+          new TextEncoder().encode(
+            `event: tool_end\ndata: ${JSON.stringify({
+              toolName: 'replace',
+              result: { returnDisplay: 'Created index.html' }, // String result for new file
+              chatId,
+              args: { file_path: filePath },
+            })}\n\n`,
+          ),
+        );
+        controller.enqueue(
+          new TextEncoder().encode(
+            'event: finish\ndata: {"success": true}\n\n',
+          ),
+        );
+        controller.close();
+      },
+    });
+
+    fetchMock.mockImplementation((url) => {
+      if (url === '/api/chat') {
+        return Promise.resolve({
+          ok: true,
+          body: stream,
+          getReader: () => stream.getReader(),
+        });
+      }
+      return Promise.resolve({ ok: true, json: async () => [] });
+    });
+
+    await act(async () => {
+      await result.current.sendMessage('create index.html');
+    });
+
+    await waitFor(() => {
+      expect(result.current.activePreviewUrl).toBe(
+        `/preview/${chatId}/index.html`,
+      );
+      expect(result.current.isTaskFinished).toBe(true);
+    });
+  });
 });

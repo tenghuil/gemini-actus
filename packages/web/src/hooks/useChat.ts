@@ -33,6 +33,8 @@ export function useChat() {
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [activePreviewUrl, setActivePreviewUrl] = useState<string | null>(null);
+  const [lastTouchedFile, setLastTouchedFile] = useState<string | null>(null);
+  const [isTaskFinished, setIsTaskFinished] = useState(false);
 
   // Ref for abort controller if needed
   // const abortControllerRef = useRef<AbortController | null>(null);
@@ -67,6 +69,7 @@ export function useChat() {
   const startNewChat = useCallback(() => {
     setMessages([]);
     setCurrentChatId(null);
+    setIsTaskFinished(false);
   }, []);
 
   const sendMessage = useCallback(
@@ -74,7 +77,9 @@ export function useChat() {
       if (!text.trim() || isLoading) return;
 
       setIsLoading(true);
+      setIsTaskFinished(false);
       setMessages((prev) => [...prev, { role: 'user', text }]);
+      setInput('');
 
       try {
         const response = await fetch('/api/chat', {
@@ -98,24 +103,36 @@ export function useChat() {
 
         while (true) {
           const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value, { stream: true });
+          const chunk = value ? decoder.decode(value, { stream: true }) : '';
           buffer += chunk;
+
           const parts = buffer.split('\n\n');
-          buffer = parts.pop() || '';
+          // If there's more data coming, keep the last part in buffer.
+          // If done, we can process everything.
+          if (!done) {
+            buffer = parts.pop() || '';
+          } else {
+            buffer = '';
+          }
 
           for (const block of parts) {
+            if (!block.trim()) continue;
+
             const lines = block.split('\n');
 
             // Check if it's a standard SSE event block
-            const eventLine = lines.find((l) => l.startsWith('event: '));
-            const dataLine = lines.find((l) => l.startsWith('data: '));
+            const eventLine = lines.find((l) => l.trim().startsWith('event: '));
+            const dataLine = lines.find((l) => l.trim().startsWith('data: '));
 
             if (eventLine && dataLine) {
-              const eventType = eventLine.slice(7).trim();
+              const eventType = eventLine
+                .slice(eventLine.indexOf(':') + 1)
+                .trim();
               try {
-                const data = JSON.parse(dataLine.slice(6));
+                const dataRaw = dataLine
+                  .slice(dataLine.indexOf(':') + 1)
+                  .trim();
+                const data = JSON.parse(dataRaw);
 
                 if (eventType === 'debug') {
                   // eslint-disable-next-line no-console
@@ -127,6 +144,8 @@ export function useChat() {
                   }
                 } else if (eventType === 'preview') {
                   setActivePreviewUrl(data.url);
+                } else if (eventType === 'finish') {
+                  setIsTaskFinished(true);
                 } else if (eventType === 'tool_start') {
                   setMessages((prev) => {
                     const newMessages = [...prev];
@@ -147,7 +166,7 @@ export function useChat() {
                       const existingCallIndex = newLastMsg.toolCalls.findIndex(
                         (tc) =>
                           tc.toolName === data.toolName &&
-                          tc.args === data.args,
+                          JSON.stringify(tc.args) === JSON.stringify(data.args),
                       );
 
                       if (existingCallIndex === -1) {
@@ -203,6 +222,44 @@ export function useChat() {
                           result: data.result,
                         };
                         newMessages[lastMsgIndex] = newLastMsg;
+
+                        // Support automatic preview/canvas opening
+                        const result = data.result;
+                        // const toolName = data.toolName; // Unused
+                        const args = data.args;
+                        const chatId = data.chatId;
+
+                        // Try to get filePath from result or args
+                        let filePath = result?.returnDisplay?.filePath;
+                        if (!filePath && args?.file_path) {
+                          filePath = args.file_path;
+                        } else if (!filePath && args?.path) {
+                          filePath = args.path;
+                        }
+
+                        if (filePath) {
+                          setLastTouchedFile(filePath);
+
+                          // If it's an HTML file, also set as preview URL automatically
+                          if (filePath.endsWith('.html') && chatId) {
+                            // Extract relative path from workspace root
+                            const parts = filePath.split('.workspace/');
+                            if (parts.length > 1) {
+                              const relativePath = parts[1]
+                                .split('/')
+                                .slice(1)
+                                .join('/');
+                              setActivePreviewUrl(
+                                `/preview/${chatId}/${relativePath}`,
+                              );
+                            } else if (!filePath.startsWith('/')) {
+                              // If it's already a relative path
+                              setActivePreviewUrl(
+                                `/preview/${chatId}/${filePath}`,
+                              );
+                            }
+                          }
+                        }
                       }
                     }
                     return newMessages;
@@ -282,16 +339,17 @@ export function useChat() {
                 }
               } catch (e) {
                 // eslint-disable-next-line no-console
-                console.error('Error parsing SSE data:', e);
+                console.error('Error parsing SSE data:', e, dataLine);
               }
               continue; // Handled as event
             }
 
             // Fallback for standard data-only SSE (like chat generation)
             for (const line of lines) {
-              if (line.startsWith('data: ')) {
+              if (line.trim().startsWith('data: ')) {
                 try {
-                  const data = JSON.parse(line.slice(6));
+                  const dataRaw = line.slice(line.indexOf(':') + 1).trim();
+                  const data = JSON.parse(dataRaw);
 
                   if (data.chatId) {
                     setCurrentChatId(data.chatId);
@@ -346,6 +404,7 @@ export function useChat() {
               }
             }
           }
+          if (done) break;
         }
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -380,5 +439,8 @@ export function useChat() {
     currentChatId,
     activePreviewUrl,
     setActivePreviewUrl,
+    lastTouchedFile,
+    setLastTouchedFile,
+    isTaskFinished,
   };
 }

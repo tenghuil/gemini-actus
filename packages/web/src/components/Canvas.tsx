@@ -16,12 +16,14 @@ interface CanvasProps {
   previewUrl?: string | null;
   chatId?: string;
   onPreviewUrlChange?: (url: string) => void;
+  lastTouchedFile?: string | null;
 }
 
 const Canvas: React.FC<CanvasProps> = ({
   previewUrl,
   chatId,
   onPreviewUrlChange,
+  lastTouchedFile,
 }) => {
   const [activeTab, setActiveTab] = useState<'ui' | 'code'>('ui');
   const [files, setFiles] = useState<FileNode[]>([]);
@@ -65,27 +67,54 @@ const Canvas: React.FC<CanvasProps> = ({
     }
   }, [previewUrl]);
 
-  const handleFileSelect = async (path: string) => {
-    setSelectedFile(path);
-    setIsLoadingFile(true);
-    try {
-      const res = await fetch('/api/files/read', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path, chatId }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setFileContent(data.content);
-      } else {
-        setFileContent('Failed to load file content.');
+  const handleFileSelect = useCallback(
+    async (path: string) => {
+      setSelectedFile(path);
+      setIsLoadingFile(true);
+      try {
+        const res = await fetch('/api/files/read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path, chatId }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setFileContent(data.content);
+        } else {
+          setFileContent('Failed to load file content.');
+        }
+      } catch (error) {
+        setFileContent('Error loading file content: ' + String(error));
+      } finally {
+        setIsLoadingFile(false);
       }
-    } catch (error) {
-      setFileContent('Error loading file content: ' + String(error));
-    } finally {
-      setIsLoadingFile(false);
+    },
+    [chatId],
+  );
+
+  useEffect(() => {
+    if (lastTouchedFile) {
+      // Determine tab based on extension
+      const ext = lastTouchedFile.split('.').pop()?.toLowerCase();
+      if (ext === 'html' || ext === 'md') {
+        setActiveTab('ui');
+      } else {
+        setActiveTab('code');
+        // If we are in code tab, we should also select the file
+        // But we need the relative path from workspace root
+        const workspacePart = '/.workspace/';
+        const idx = lastTouchedFile.indexOf(workspacePart);
+        if (idx !== -1) {
+          const relativePath = lastTouchedFile
+            .substring(idx + workspacePart.length)
+            .split('/')
+            .slice(1)
+            .join('/');
+          void handleFileSelect(relativePath);
+        }
+      }
     }
-  };
+  }, [lastTouchedFile, handleFileSelect]);
 
   const currentLanguage = selectedFile
     ? selectedFile.split('.').pop() || 'text'

@@ -12,11 +12,11 @@ import {
   BaseToolInvocation,
 } from './tools.js';
 import type { MessageBus } from '../confirmation-bus/message-bus.js';
-
-export const PREVIEW_TOOL_NAME = 'preview_site';
+import { PREVIEW_TOOL_NAME } from './tool-names.js';
 
 export interface PreviewToolParams {
-  path: string;
+  path?: string;
+  url?: string;
 }
 
 export class PreviewToolInvocation extends BaseToolInvocation<
@@ -33,16 +33,17 @@ export class PreviewToolInvocation extends BaseToolInvocation<
   }
 
   getDescription(): string {
+    if (this.params.url) {
+      return `Previewing site at ${this.params.url}`;
+    }
     return `Previewing site at ${this.params.path}`;
   }
 
   async execute(_signal: AbortSignal): Promise<ToolResult> {
-    // This tool is mainly a signal for the frontend.
-    // The backend intercepts it to emit an event.
-    // But it should also return a success message.
+    const target = this.params.url || this.params.path;
     return {
-      llmContent: `Previewing site at ${this.params.path}`,
-      returnDisplay: `Previewing site at ${this.params.path}`,
+      llmContent: `Previewing site at ${target}`,
+      returnDisplay: `Previewing site at ${target}`,
     };
   }
 }
@@ -57,7 +58,7 @@ export class PreviewTool extends BaseDeclarativeTool<
     super(
       PreviewTool.Name,
       'Preview Site',
-      'Preview a static website in the canvas. Use this whenever you build or modify a web page to show the user the result.',
+      'Preview a website or a local file in the canvas. Use this whenever you build or modify a web page, or when you start a local server, to show the user the result.',
       Kind.Execute,
       {
         type: 'object',
@@ -65,10 +66,14 @@ export class PreviewTool extends BaseDeclarativeTool<
           path: {
             type: 'string',
             description:
-              'The path to the file to preview (e.g. index.html) relative to the current working directory.',
+              'The path to the file to preview (e.g. index.html) relative to the current working directory. Use this for static files.',
+          },
+          url: {
+            type: 'string',
+            description:
+              'The full URL to preview (e.g. http://localhost:3000). Use this when you have a running server or want to show an external site.',
           },
         },
-        required: ['path'],
       },
       messageBus,
       false,

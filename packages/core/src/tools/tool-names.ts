@@ -22,6 +22,9 @@ export const LS_TOOL_NAME = 'list_directory';
 export const MEMORY_TOOL_NAME = 'save_memory';
 export const GET_INTERNAL_DOCS_TOOL_NAME = 'get_internal_docs';
 export const ACTIVATE_SKILL_TOOL_NAME = 'activate_skill';
+export const COMPLETE_TASK_TOOL_NAME = 'complete_task';
+export const PREVIEW_TOOL_NAME = 'preview_site';
+
 export const EDIT_TOOL_NAMES = new Set([EDIT_TOOL_NAME, WRITE_FILE_TOOL_NAME]);
 export const ASK_USER_TOOL_NAME = 'ask_user';
 export const ASK_USER_DISPLAY_NAME = 'Ask User';
@@ -47,6 +50,8 @@ export const ALL_BUILTIN_TOOL_NAMES = [
   MEMORY_TOOL_NAME,
   ACTIVATE_SKILL_TOOL_NAME,
   ASK_USER_TOOL_NAME,
+  COMPLETE_TASK_TOOL_NAME,
+  PREVIEW_TOOL_NAME,
 ] as const;
 
 /**

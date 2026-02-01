@@ -16,7 +16,7 @@ import {
 import {
   DEFAULT_GEMINI_FLASH_MODEL,
   DEFAULT_GEMINI_MODEL,
-  DEFAULT_GEMINI_MODEL_AUTO,
+  GEMINI_MODEL_ALIAS_AUTO,
 } from '../../config/models.js';
 import { promptIdContext } from '../../utils/promptIdContext.js';
 import type { Content } from '@google/genai';
@@ -50,7 +50,7 @@ describe('ClassifierStrategy', () => {
       modelConfigService: {
         getResolvedConfig: vi.fn().mockReturnValue(mockResolvedConfig),
       },
-      getModel: () => DEFAULT_GEMINI_MODEL_AUTO,
+      getModel: () => GEMINI_MODEL_ALIAS_AUTO,
       getPreviewFeatures: () => false,
       getNumericalRoutingEnabled: vi.fn().mockResolvedValue(false),
     } as unknown as Config;

@@ -6,7 +6,9 @@
   padding: 16px;
   height: 100vh;
   border-right: 1px solid transparent;
-  transition: transform 0.3s ease, margin-left 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    margin-left 0.3s ease;
   position: fixed;
   left: 0;
   top: 0;
@@ -63,7 +65,7 @@
 .newChatBtn:hover {
   background-color: #dbeafe;
   color: var(--accent-color);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .section {

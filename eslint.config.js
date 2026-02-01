@@ -39,6 +39,7 @@ export default tseslint.config(
       'packages/test-utils/**',
       'packages/core/src/skills/builtin/skill-creator/scripts/*.cjs',
       'packages/**/.next/**',
+      'packages/**/next-env.d.ts',
       '.workspace/**',
     ],
   },

@@ -4,7 +4,12 @@
   left: 0;
   width: 100%;
   padding-bottom: 32px;
-  background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.8) 20%, #ffffff 50%);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 255, 255, 0.8) 20%,
+    #ffffff 50%
+  );
   display: flex;
   justify-content: center;
   z-index: 10;
@@ -71,7 +76,7 @@
 }
 
 .iconBtn:hover {
-  background-color: rgba(0,0,0,0.05);
+  background-color: rgba(0, 0, 0, 0.05);
   color: var(--text-color);
 }
 

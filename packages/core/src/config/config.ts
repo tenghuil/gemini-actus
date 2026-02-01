@@ -2156,8 +2156,9 @@ export class Config {
     if (this.getUseWriteTodos()) {
       registerCoreTool(WriteTodosTool);
     }
-    registerCoreTool(BrowserTool);
+    registerCoreTool(BrowserTool, this);
     registerCoreTool(CompleteTaskTool);
+    registerCoreTool(PreviewTool);
 
     // Register Subagents as Tools
     this.registerSubAgentTools(registry);

@@ -9,12 +9,12 @@ import type { Request, Response, NextFunction, Express } from 'express';
 import { setupFileSystemRoutes } from './web-routes.js';
 import path from 'node:path';
 
-// Mock fs/promises
-const mockReaddir = vi.fn();
-const mockReadFile = vi.fn();
-const mockStat = vi.fn();
-
-const mockAccess = vi.fn();
+const { mockReaddir, mockReadFile, mockStat, mockAccess } = vi.hoisted(() => ({
+  mockReaddir: vi.fn(),
+  mockReadFile: vi.fn(),
+  mockStat: vi.fn(),
+  mockAccess: vi.fn(),
+}));
 
 vi.mock('node:fs/promises', async () => ({
   default: {
@@ -205,6 +205,7 @@ describe('FileSystem Routes', () => {
     );
     expect(mockRes.sendFile).toHaveBeenCalledWith(
       expectedPath,
+      expect.anything(),
       expect.anything(),
     );
   });

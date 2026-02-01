@@ -12,7 +12,11 @@ import * as chromeLauncher from 'chrome-launcher';
 import { debugLogger } from '../utils/debugLogger.js';
 import { getErrorMessage } from '../utils/errors.js';
 import { ToolErrorType } from './tool-error.js';
-// import { shouldAttemptBrowserLaunch } from '../utils/browser.js';
+import type { Config } from '../config/config.js';
+import { isPortOpen } from '../utils/port-utils.js';
+import { spawn } from 'node:child_process';
+import path from 'node:path';
+import fs from 'node:fs';
 
 interface BrowserToolParams {
   action:
@@ -71,11 +75,16 @@ class BrowserManager {
   async launchBrowser() {
     await this.close(); // Ensure clean state
 
-    const isHeadless = false; // Forced headful for verification
-    const chromeFlags = ['--no-sandbox', '--disable-gpu'];
-    // if (isHeadless) {
-    //   chromeFlags.push('--headless');
-    // }
+    const isHeadless = false; // Use headless for server environments
+    const chromeFlags = [
+      '--no-sandbox',
+      '--disable-gpu',
+      '--allow-insecure-localhost',
+      '--disable-web-security',
+    ];
+    if (isHeadless) {
+      chromeFlags.push('--headless');
+    }
 
     // Find Chrome
     this.chrome = await chromeLauncher.launch({
@@ -83,7 +92,7 @@ class BrowserManager {
     });
 
     this.browser = await puppeteer.connect({
-      browserURL: `http://localhost:${this.chrome.port}`,
+      browserURL: `http://127.0.0.1:${this.chrome.port}`,
       defaultViewport: null, // Allow viewport to resize in headful mode
     });
 
@@ -121,6 +130,15 @@ class BrowserToolInvocation extends BaseToolInvocation<
   BrowserToolParams,
   ToolResult
 > {
+  constructor(
+    private readonly config: Config,
+    params: BrowserToolParams,
+    messageBus: MessageBus,
+    toolName?: string,
+    toolDisplayName?: string,
+  ) {
+    super(params, messageBus, toolName, toolDisplayName);
+  }
   getDescription(): string {
     const action = this.params.action;
     switch (action) {
@@ -160,6 +178,32 @@ class BrowserToolInvocation extends BaseToolInvocation<
       switch (this.params.action) {
         case 'open_url': {
           if (!this.params.url) throw new Error('url is required for open_url');
+
+          const url = new URL(this.params.url);
+          if (
+            url.hostname === 'localhost' ||
+            url.hostname === '127.0.0.1' ||
+            url.hostname === '0.0.0.0'
+          ) {
+            const port = parseInt(url.port || '80', 10);
+            const isOpen = await isPortOpen(port, url.hostname);
+            if (!isOpen) {
+              debugLogger.log(
+                `Local port ${port} is closed. Attempting auto-startup...`,
+              );
+              await this.attemptAutoStartup(port);
+              // Wait a bit for the server to potentially start
+              let retries = 10;
+              while (retries > 0) {
+                if (await isPortOpen(port, url.hostname)) {
+                  break;
+                }
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                retries--;
+              }
+            }
+          }
+
           await page.goto(this.params.url, { waitUntil: 'networkidle2' });
           break;
         }
@@ -226,13 +270,50 @@ class BrowserToolInvocation extends BaseToolInvocation<
       };
     }
   }
+
+  private async attemptAutoStartup(port: number) {
+    const targetDir = this.config.getTargetDir();
+    const pkgJsonPath = path.join(targetDir, 'package.json');
+
+    let command = '';
+    if (fs.existsSync(pkgJsonPath)) {
+      try {
+        const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+        if (pkgJson.scripts?.dev) {
+          command = 'npm run dev';
+        } else if (pkgJson.scripts?.start) {
+          command = 'npm start';
+        }
+      } catch (e) {
+        debugLogger.error(`Error reading package.json: ${getErrorMessage(e)}`);
+      }
+    }
+
+    if (!command) {
+      debugLogger.warn('No suitable start script found in package.json');
+      return;
+    }
+
+    debugLogger.log(`Starting background server with command: ${command}`);
+    const [cmd, ...args] = command.split(' ');
+    const child = spawn(cmd, args, {
+      cwd: targetDir,
+      detached: true,
+      stdio: 'ignore',
+      env: { ...process.env, PORT: port.toString() },
+    });
+    child.unref();
+  }
 }
 
 export class BrowserTool extends BaseDeclarativeTool<
   BrowserToolParams,
   ToolResult
 > {
-  constructor(messageBus: MessageBus) {
+  constructor(
+    private readonly config: Config,
+    messageBus: MessageBus,
+  ) {
     super(
       'browser_tool',
       'Browser Tool',
@@ -294,6 +375,7 @@ export class BrowserTool extends BaseDeclarativeTool<
     toolDisplayName?: string,
   ): BaseToolInvocation<BrowserToolParams, ToolResult> {
     return new BrowserToolInvocation(
+      this.config,
       params,
       messageBus,
       toolName,

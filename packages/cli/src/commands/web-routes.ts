@@ -180,7 +180,7 @@ export async function setupFileSystemRoutes(app: express.Express) {
 
       try {
         await fs.access(file);
-        res.sendFile(file, (err) => {
+        res.sendFile(file, { dotfiles: 'allow' }, (err) => {
           if (err) {
             if (!res.headersSent) res.status(500).send('Error serving file');
           }

@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type React from 'react';
 import { RefreshCw, ExternalLink } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 interface PreviewProps {
   url?: string;
@@ -18,9 +19,44 @@ const Preview: React.FC<PreviewProps> = ({
   onUrlChange,
 }) => {
   const [key, setKey] = useState(0);
+  const [isMarkdown, setIsMarkdown] = useState(false);
+  const [mdContent, setMdContent] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const isMd = url.toLowerCase().endsWith('.md');
+    setIsMarkdown(isMd);
+
+    if (isMd) {
+      void fetchMarkdownContent(url);
+    }
+  }, [url]);
+
+  const fetchMarkdownContent = async (mdUrl: string) => {
+    setIsLoading(true);
+    try {
+      // The url looks like /preview/chatId/path/to/file.md
+      // We need to fetch the content. Our web-routes serves files via /preview
+      const res = await fetch(mdUrl);
+      if (res.ok) {
+        const text = await res.text();
+        setMdContent(text);
+      } else {
+        setMdContent('# Error loading markdown');
+      }
+    } catch (error) {
+      setMdContent('# Error: ' + String(error));
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleRefresh = () => {
-    setKey((prev) => prev + 1);
+    if (isMarkdown) {
+      void fetchMarkdownContent(url);
+    } else {
+      setKey((prev) => prev + 1);
+    }
   };
 
   return (
@@ -30,6 +66,7 @@ const Preview: React.FC<PreviewProps> = ({
         flexDirection: 'column',
         height: '100%',
         backgroundColor: '#fff',
+        color: '#333',
       }}
     >
       <div
@@ -90,17 +127,29 @@ const Preview: React.FC<PreviewProps> = ({
           <ExternalLink size={16} />
         </a>
       </div>
-      <iframe
-        key={key}
-        src={url}
-        style={{
-          flex: 1,
-          border: 'none',
-          width: '100%',
-          height: '100%',
-        }}
-        title="App Preview"
-      />
+
+      <div style={{ flex: 1, overflow: 'auto', width: '100%', height: '100%' }}>
+        {isMarkdown ? (
+          <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
+            {isLoading ? (
+              <div style={{ color: '#888' }}>Loading markdown...</div>
+            ) : (
+              <ReactMarkdown>{mdContent}</ReactMarkdown>
+            )}
+          </div>
+        ) : (
+          <iframe
+            key={key}
+            src={url}
+            style={{
+              border: 'none',
+              width: '100%',
+              height: '100%',
+            }}
+            title="App Preview"
+          />
+        )}
+      </div>
     </div>
   );
 };

@@ -65,7 +65,18 @@ export const webCommand: CommandModule = {
 
       // Initialize per-chat config
       // We use the chatId as the sessionId to ensure the workspace is .workspace/<chatId>
-      const chatConfig = await loadCliConfig(baseSettings.merged, chatId, {
+      const webSettings = {
+        ...baseSettings.merged,
+        tools: {
+          ...baseSettings.merged.tools,
+          shell: {
+            ...baseSettings.merged.tools?.shell,
+            enableInteractiveShell: false,
+          },
+        },
+      };
+
+      const chatConfig = await loadCliConfig(webSettings, chatId, {
         ...argv,
         approvalMode: 'yolo',
       } as unknown as CliArgs);
@@ -176,6 +187,7 @@ export const webCommand: CommandModule = {
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
+      res.setHeader('X-Accel-Buffering', 'no'); // Prevent proxy buffering
 
       // Send the chatId first so frontend knows
       res.write(`event: chat_id\n`);
@@ -194,6 +206,10 @@ export const webCommand: CommandModule = {
           chatId,
           historyManager,
         );
+
+        // Emit finish event after all process turns are done
+        res.write(`event: finish\n`);
+        res.write(`data: ${JSON.stringify({ success: true })}\n\n`);
       } catch (error) {
         res.write(`event: error\n`);
         res.write(`data: ${JSON.stringify({ message: String(error) })}\n\n`);
@@ -288,24 +304,29 @@ export const webCommand: CommandModule = {
               // Emit tool_start event
               res.write(`event: tool_start\n`);
               res.write(
-                `data: ${JSON.stringify({ toolName, args: call.args })}\n\n`,
+                `data: ${JSON.stringify({ toolName, args: call.args, chatId })}\n\n`,
               );
 
               if (
                 toolName === 'preview_site' &&
                 call.args &&
-                typeof call.args === 'object' &&
-                'path' in call.args
+                typeof call.args === 'object'
               ) {
-                const args = call.args as { path: string };
-                // Ensure path has leading slash if not present for clean url
-                const cleanPath = args.path.startsWith('/')
-                  ? args.path
-                  : `/${args.path}`;
-                // Use chatId in URL: /preview/<chatId>/<path>
-                const previewUrl = `/preview/${chatId}${cleanPath}`;
-                res.write(`event: preview\n`);
-                res.write(`data: ${JSON.stringify({ url: previewUrl })}\n\n`);
+                const args = call.args as { path?: string; url?: string };
+                let previewUrl = '';
+                if (args.url) {
+                  previewUrl = args.url;
+                } else if (args.path) {
+                  const cleanPath = args.path.startsWith('/')
+                    ? args.path
+                    : `/${args.path}`;
+                  previewUrl = `/preview/${chatId}${cleanPath}`;
+                }
+
+                if (previewUrl) {
+                  res.write(`event: preview\n`);
+                  res.write(`data: ${JSON.stringify({ url: previewUrl })}\n\n`);
+                }
               }
 
               const result = await tool.buildAndExecute(
@@ -315,7 +336,9 @@ export const webCommand: CommandModule = {
 
               // Emit tool_end event (optional, but good for clearing status)
               res.write(`event: tool_end\n`);
-              res.write(`data: ${JSON.stringify({ toolName, result })}\n\n`);
+              res.write(
+                `data: ${JSON.stringify({ toolName, result, chatId, args: call.args })}\n\n`,
+              );
 
               return {
                 functionResponse: {
@@ -326,7 +349,7 @@ export const webCommand: CommandModule = {
             } catch (error) {
               res.write(`event: tool_error\n`);
               res.write(
-                `data: ${JSON.stringify({ toolName, error: String(error) })}\n\n`,
+                `data: ${JSON.stringify({ toolName, error: String(error), chatId, args: call.args })}\n\n`,
               );
               return {
                 functionResponse: {
