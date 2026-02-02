@@ -41,6 +41,7 @@ export default tseslint.config(
       'packages/**/.next/**',
       'packages/**/next-env.d.ts',
       '.workspace/**',
+      'packages/core/templates/**',
     ],
   },
   eslint.configs.recommended,

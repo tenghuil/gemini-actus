@@ -24,6 +24,8 @@ export const GET_INTERNAL_DOCS_TOOL_NAME = 'get_internal_docs';
 export const ACTIVATE_SKILL_TOOL_NAME = 'activate_skill';
 export const COMPLETE_TASK_TOOL_NAME = 'complete_task';
 export const PREVIEW_TOOL_NAME = 'preview_site';
+export const WEBDEV_INIT_PROJECT_TOOL_NAME = 'webdev_init_project';
+export const WEBDEV_REQUEST_SECRETS_TOOL_NAME = 'webdev_request_secrets';
 
 export const EDIT_TOOL_NAMES = new Set([EDIT_TOOL_NAME, WRITE_FILE_TOOL_NAME]);
 export const ASK_USER_TOOL_NAME = 'ask_user';
@@ -52,6 +54,8 @@ export const ALL_BUILTIN_TOOL_NAMES = [
   ASK_USER_TOOL_NAME,
   COMPLETE_TASK_TOOL_NAME,
   PREVIEW_TOOL_NAME,
+  WEBDEV_INIT_PROJECT_TOOL_NAME,
+  WEBDEV_REQUEST_SECRETS_TOOL_NAME,
 ] as const;
 
 /**

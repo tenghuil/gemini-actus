@@ -63,6 +63,8 @@ import { WriteTodosTool } from '../tools/write-todos.js';
 import { BrowserTool } from '../tools/browser-tool.js';
 import { PreviewTool } from '../tools/preview-tool.js';
 import { CompleteTaskTool } from '../tools/complete-task.js';
+import { WebdevInitProjectTool } from '../tools/webdev-init-project.js';
+import { WebdevRequestSecretsTool } from '../tools/webdev-request-secrets.js';
 import type { FileSystemService } from '../services/fileSystemService.js';
 import { StandardFileSystemService } from '../services/fileSystemService.js';
 import { logRipgrepFallback, logFlashFallback } from '../telemetry/loggers.js';
@@ -2158,6 +2160,8 @@ export class Config {
     }
     registerCoreTool(BrowserTool, this);
     registerCoreTool(CompleteTaskTool);
+    registerCoreTool(WebdevInitProjectTool, this);
+    registerCoreTool(WebdevRequestSecretsTool);
     registerCoreTool(PreviewTool);
 
     // Register Subagents as Tools

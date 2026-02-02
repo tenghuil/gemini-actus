@@ -18,7 +18,8 @@
     "typecheck": "tsc --noEmit"
   },
   "files": [
-    "dist"
+    "dist",
+    "templates"
   ],
   "dependencies": {
     "@a2a-js/sdk": "^0.3.8",
