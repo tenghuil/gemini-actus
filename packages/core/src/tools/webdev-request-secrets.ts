@@ -13,15 +13,6 @@ import {
   type ToolCallConfirmationDetails,
 } from './tools.js';
 import type { MessageBus } from '../confirmation-bus/message-bus.js';
-import {
-  MessageBusType,
-  QuestionType,
-  type AskUserRequest,
-  type AskUserResponse,
-} from '../confirmation-bus/types.js';
-import { randomUUID } from 'node:crypto';
-import fs from 'node:fs';
-import path from 'node:path';
 
 export interface SecretRequirement {
   name: string;
@@ -64,125 +55,17 @@ class WebdevRequestSecretsToolInvocation extends BaseToolInvocation<
     return false;
   }
 
-  async execute(signal: AbortSignal): Promise<ToolResult> {
+  async execute(_signal: AbortSignal): Promise<ToolResult> {
     const { message, secrets } = this.params;
-    const correlationId = randomUUID();
+    const secretList = secrets
+      .map((s) => `- ${s.name}: ${s.description}`)
+      .join('\n');
+    const text = `${message}\n\nPlease provide the following secrets:\n${secretList}`;
 
-    // Map secrets to questions
-    // Note: 'header' is used as a short label. We use the secret name,
-    // but we might want to truncate it if logic elsewhere enforces 12 chars.
-    // However, for now passing full name.
-    const questions = secrets.map((s) => ({
-      question: `Please enter the value for ${s.name}: ${s.description}`,
-      header: s.name,
-      type: QuestionType.TEXT,
-      placeholder: `Value for ${s.name}`,
-    }));
-
-    const request: AskUserRequest = {
-      type: MessageBusType.ASK_USER_REQUEST,
-      questions,
-      correlationId,
+    return {
+      llmContent: text,
+      returnDisplay: text,
     };
-
-    return new Promise<ToolResult>((resolve, reject) => {
-      const responseHandler = (response: AskUserResponse): void => {
-        if (response.correlationId === correlationId) {
-          cleanup();
-
-          if (response.cancelled) {
-            resolve({
-              llmContent: 'User cancelled the secret request.',
-              returnDisplay: 'User cancelled request.',
-            });
-            return;
-          }
-
-          try {
-            // Save secrets to .env
-            // We'll append to .env in the current working directory.
-            // A better approach would be to check if the key exists, but appending usually overrides in many parsers
-            // (or simplest is just append for now, or check/rewrite).
-            // For safety/simplicity in this tool, we simply append.
-            const envPath = path.join(process.cwd(), '.env');
-            let envContent = '';
-
-            // Check if .env exists to add newline if needed
-            if (fs.existsSync(envPath)) {
-              const currentContent = fs.readFileSync(envPath, 'utf-8');
-              if (currentContent && !currentContent.endsWith('\n')) {
-                envContent += '\n';
-              }
-            }
-
-            const activeSecrets: string[] = [];
-
-            Object.entries(response.answers).forEach(([index, value]) => {
-              const secretIdx = parseInt(index, 10);
-              const secretDef = secrets[secretIdx];
-              if (secretDef && value) {
-                // Determine quoting. If value has spaces, quote it.
-                // Simple version.
-                const safeValue =
-                  value.includes(' ') || value.includes('#')
-                    ? `"${value.replace(/"/g, '\\"')}"`
-                    : value;
-                envContent += `${secretDef.name}=${safeValue}\n`;
-                activeSecrets.push(secretDef.name);
-              }
-            });
-
-            fs.appendFileSync(envPath, envContent);
-
-            resolve({
-              llmContent: `Successfully acquired and saved the following secrets to .env: ${activeSecrets.join(', ')}. Context: ${message}`,
-              returnDisplay: `Secrets saved to .env: ${activeSecrets.join(', ')}`,
-            });
-          } catch (err: unknown) {
-            const errorMessage =
-              err instanceof Error ? err.message : String(err);
-            resolve({
-              llmContent: `Failed to save secrets to .env: ${errorMessage}`,
-              returnDisplay: `Error saving secrets: ${errorMessage}`,
-              error: { message: errorMessage },
-            });
-          }
-        }
-      };
-
-      const cleanup = () => {
-        this.messageBus.unsubscribe(
-          MessageBusType.ASK_USER_RESPONSE,
-          responseHandler,
-        );
-        signal.removeEventListener('abort', abortHandler);
-      };
-
-      const abortHandler = () => {
-        cleanup();
-        resolve({
-          llmContent: 'Tool execution cancelled.',
-          returnDisplay: 'Cancelled',
-          error: { message: 'Cancelled' },
-        });
-      };
-
-      if (signal.aborted) {
-        abortHandler();
-        return;
-      }
-
-      signal.addEventListener('abort', abortHandler);
-      this.messageBus.subscribe(
-        MessageBusType.ASK_USER_RESPONSE,
-        responseHandler,
-      );
-
-      this.messageBus.publish(request).catch((err) => {
-        cleanup();
-        reject(err);
-      });
-    });
   }
 }
 
