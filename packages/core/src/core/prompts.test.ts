@@ -144,6 +144,14 @@ describe('Core System Prompt (prompts.ts)', () => {
     expect(prompt).toMatchSnapshot();
   });
 
+  it('should include browser_tool verification instruction', () => {
+    const prompt = getCoreSystemPrompt(mockConfig);
+    expect(prompt).toContain(
+      "6. **Verify (Web App):** For web applications, you MUST use the 'browser_tool' to visit the local server, interact with the UI, and verify functionalities match the requirements.",
+    );
+    expect(prompt).toMatchSnapshot();
+  });
+
   it.each([
     ['empty string', ''],
     ['whitespace only', '   \n  \t '],

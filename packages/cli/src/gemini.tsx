@@ -64,6 +64,7 @@ import {
   ValidationCancelledError,
   ValidationRequiredError,
   type FetchAdminControlsResponse,
+  BackgroundProcessManager,
 } from '@google/gemini-actus-core';
 import {
   initializeApp,
@@ -530,6 +531,11 @@ export async function main() {
     // This runs before telemetry shutdown in runExitCleanup()
     registerCleanup(async () => {
       await config.getHookSystem()?.fireSessionEndEvent(SessionEndReason.Exit);
+    });
+
+    // Cleanup background processes (e.g. webdev servers)
+    registerCleanup(() => {
+      BackgroundProcessManager.getInstance().cleanup();
     });
 
     // Cleanup sessions after config initialization

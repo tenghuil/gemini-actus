@@ -39,6 +39,7 @@ describe('BrowserTool', () => {
         type: vi.fn(),
       },
       content: vi.fn().mockResolvedValue('<html></html>'),
+      click: vi.fn(),
       screenshot: vi.fn().mockResolvedValue('base64screenshot'),
       setViewport: vi.fn(),
       isClosed: vi.fn().mockReturnValue(false),
@@ -111,6 +112,16 @@ describe('BrowserTool', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((mockPage as any).mouse.click).toHaveBeenCalledWith(100, 200);
+  });
+
+  it('should click element by selector', async () => {
+    await tool.buildAndExecute(
+      { action: 'click', selector: '#my-button' },
+      new AbortController().signal,
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((mockPage as any).click).toHaveBeenCalledWith('#my-button');
   });
 
   it('should type text', async () => {

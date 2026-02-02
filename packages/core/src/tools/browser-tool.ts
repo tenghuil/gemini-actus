@@ -30,6 +30,7 @@ interface BrowserToolParams {
   url?: string;
   x?: number;
   y?: number;
+  selector?: string;
   text?: string;
   delta_x?: number;
   delta_y?: number;
@@ -145,6 +146,9 @@ class BrowserToolInvocation extends BaseToolInvocation<
       case 'open_url':
         return `Open URL: ${this.params.url}`;
       case 'click':
+        if (this.params.selector) {
+          return `Click element: ${this.params.selector}`;
+        }
         return `Click at (${this.params.x}, ${this.params.y})`;
       case 'type':
         return `Type text: ${this.params.text}`;
@@ -208,10 +212,18 @@ class BrowserToolInvocation extends BaseToolInvocation<
           break;
         }
         case 'click': {
-          if (this.params.x === undefined || this.params.y === undefined) {
-            throw new Error('x and y are required for click');
+          if (this.params.selector) {
+            await page.click(this.params.selector);
+          } else if (
+            this.params.x !== undefined &&
+            this.params.y !== undefined
+          ) {
+            await page.mouse.click(this.params.x, this.params.y);
+          } else {
+            throw new Error(
+              'Either selector or x and y are required for click',
+            );
           }
-          await page.mouse.click(this.params.x, this.params.y);
           break;
         }
         case 'type': {
@@ -346,6 +358,10 @@ export class BrowserTool extends BaseDeclarativeTool<
           y: {
             type: 'number',
             description: 'Y coordinate for click (required for click).',
+          },
+          selector: {
+            type: 'string',
+            description: 'CSS selector to click (optional for click).',
           },
           text: {
             type: 'string',
