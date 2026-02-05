@@ -1,5 +1,15 @@
 # Gemini Actus
 
+# Only look at this part
+
+Running web UI backend: BE: npm run start -- web FE: npm run dev
+--workspace=@google/gemini-actus-web
+
+Run yolo mode in terminal: npm run start -- --yolo yolo mode is full automated.
+If you don't want it. Just remove it.
+
+# End
+
 [![Gemini Actus CI](https://github.com/google-gemini/gemini-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/google-gemini/gemini-cli/actions/workflows/ci.yml)
 [![Gemini Actus E2E (Chained)](https://github.com/google-gemini/gemini-cli/actions/workflows/chained_e2e.yml/badge.svg)](https://github.com/google-gemini/gemini-cli/actions/workflows/chained_e2e.yml)
 [![Version](https://img.shields.io/npm/v/@google/gemini-actus)](https://www.npmjs.com/package/@google/gemini-actus)
