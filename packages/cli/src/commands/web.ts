@@ -26,14 +26,21 @@ export const webCommand: CommandModule = {
   command: 'web',
   describe: 'Start the Gemini Actus Web UI',
   builder: (yargs) =>
-    yargs.option('port', {
-      alias: 'p',
-      type: 'number',
-      default: 3333,
-      description: 'Port to run the server on',
-    }),
+    yargs
+      .option('port', {
+        alias: 'p',
+        type: 'number',
+        default: 3333,
+        description: 'Port to run the server on',
+      })
+      .option('dev', {
+        type: 'boolean',
+        default: false,
+        description: 'Start the frontend in development mode',
+      }),
   handler: async (argv) => {
     const port = argv['port'] as number;
+    const dev = argv['dev'] as boolean;
     const app = express();
     const server = createServer(app);
     // WebSocket server for future use
@@ -67,6 +74,13 @@ export const webCommand: CommandModule = {
       // We use the chatId as the sessionId to ensure the workspace is .workspace/<chatId>
       const webSettings = {
         ...baseSettings.merged,
+        security: {
+          ...baseSettings.merged.security,
+          folderTrust: {
+            ...baseSettings.merged.security?.folderTrust,
+            enabled: false,
+          },
+        },
         tools: {
           ...baseSettings.merged.tools,
           shell: {
@@ -394,7 +408,28 @@ export const webCommand: CommandModule = {
         );
       }
 
-      if (webPath) {
+      if (dev && webPath) {
+        debugLogger.log('Starting frontend in development mode...');
+        const { spawn } = await import('node:child_process');
+        const child = spawn('npm', ['run', 'dev'], {
+          cwd: webPath,
+          stdio: 'inherit',
+          shell: true,
+        });
+
+        child.on('error', (err) => {
+          debugLogger.error('Failed to start frontend:', err);
+        });
+
+        const cleanup = () => {
+          child.kill();
+          process.exit();
+        };
+
+        // Ensure child process is killed on exit
+        process.on('SIGINT', cleanup);
+        process.on('SIGTERM', cleanup);
+      } else if (webPath) {
         const distPath = path.join(webPath, 'dist');
         app.use(express.static(distPath));
 

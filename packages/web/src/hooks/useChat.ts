@@ -146,6 +146,74 @@ export function useChat() {
                   setActivePreviewUrl(data.url);
                 } else if (eventType === 'finish') {
                   setIsTaskFinished(true);
+                } else if (eventType === 'content') {
+                  // Handle content event (new backend style)
+                  const text =
+                    typeof data.value === 'string'
+                      ? data.value
+                      : data.value?.text || '';
+                  currentResponse += text;
+
+                  const textSnapshot = currentResponse;
+                  const thoughtsSnapshot = currentThoughts;
+
+                  setMessages((prev) => {
+                    const newMessages = [...prev];
+                    const lastMsgIndex = newMessages.length - 1;
+                    const lastMsg = newMessages[lastMsgIndex];
+
+                    if (lastMsg && lastMsg.role === 'model') {
+                      newMessages[lastMsgIndex] = {
+                        ...lastMsg,
+                        text: textSnapshot,
+                        thoughts: thoughtsSnapshot,
+                      };
+                    } else {
+                      return [
+                        ...prev,
+                        {
+                          role: 'model',
+                          text: textSnapshot,
+                          thoughts: thoughtsSnapshot,
+                        },
+                      ];
+                    }
+                    return newMessages;
+                  });
+                } else if (eventType === 'thought') {
+                  // Handle thought event (new backend style)
+                  const text =
+                    typeof data.value === 'string'
+                      ? data.value
+                      : data.value?.text || '';
+                  currentThoughts += text;
+
+                  const textSnapshot = currentResponse;
+                  const thoughtsSnapshot = currentThoughts;
+
+                  setMessages((prev) => {
+                    const newMessages = [...prev];
+                    const lastMsgIndex = newMessages.length - 1;
+                    const lastMsg = newMessages[lastMsgIndex];
+
+                    if (lastMsg && lastMsg.role === 'model') {
+                      newMessages[lastMsgIndex] = {
+                        ...lastMsg,
+                        text: textSnapshot,
+                        thoughts: thoughtsSnapshot,
+                      };
+                    } else {
+                      return [
+                        ...prev,
+                        {
+                          role: 'model',
+                          text: textSnapshot,
+                          thoughts: thoughtsSnapshot,
+                        },
+                      ];
+                    }
+                    return newMessages;
+                  });
                 } else if (eventType === 'tool_start') {
                   setMessages((prev) => {
                     const newMessages = [...prev];
@@ -240,8 +308,12 @@ export function useChat() {
                         if (filePath) {
                           setLastTouchedFile(filePath);
 
-                          // If it's an HTML file, also set as preview URL automatically
-                          if (filePath.endsWith('.html') && chatId) {
+                          // If it's an HTML or Markdown file, also set as preview URL automatically
+                          if (
+                            (filePath.endsWith('.html') ||
+                              filePath.endsWith('.md')) &&
+                            chatId
+                          ) {
                             // Extract relative path from workspace root
                             const parts = filePath.split('.workspace/');
                             if (parts.length > 1) {

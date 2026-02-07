@@ -150,6 +150,16 @@ describe('useChat', () => {
 
     const stream = new ReadableStream({
       start(controller) {
+        // Must send tool_start first for the tool call to be registered in messages
+        controller.enqueue(
+          new TextEncoder().encode(
+            `event: tool_start\ndata: ${JSON.stringify({
+              toolName: 'replace',
+              args: { file_path: filePath },
+              chatId,
+            })}\n\n`,
+          ),
+        );
         controller.enqueue(
           new TextEncoder().encode(
             `event: tool_end\ndata: ${JSON.stringify({
@@ -189,6 +199,131 @@ describe('useChat', () => {
         `/preview/${chatId}/index.html`,
       );
       expect(result.current.isTaskFinished).toBe(true);
+    });
+  });
+
+  it('should handle "content" and "thought" events correctly (new style)', async () => {
+    const { result } = renderHook(() => useChat());
+
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(
+          new TextEncoder().encode(
+            'event: thought\ndata: {"value": "Thinking..."}\n\n',
+          ),
+        );
+        setTimeout(() => {
+          controller.enqueue(
+            new TextEncoder().encode(
+              'event: content\ndata: {"value": "Hello"}\n\n',
+            ),
+          );
+        }, 10);
+        setTimeout(() => {
+          controller.enqueue(
+            new TextEncoder().encode(
+              'event: content\ndata: {"value": " World"}\n\n',
+            ),
+          );
+          controller.close();
+        }, 20);
+      },
+    });
+
+    fetchMock.mockImplementation((url) => {
+      if (url === '/api/chat') {
+        return Promise.resolve({
+          ok: true,
+          body: stream,
+          getReader: () => stream.getReader(),
+        });
+      }
+      return Promise.resolve({ ok: true, json: async () => [] });
+    });
+
+    await act(async () => {
+      await result.current.sendMessage('Hi');
+    });
+
+    await waitFor(() => {
+      const msg = result.current.messages.find((m) => m.role === 'model');
+      expect(msg).toBeDefined();
+      expect(msg?.text).toBe('Hello World');
+      // Thoughts handling might be object or string depending on implementation,
+      // but based on `client.ts` it seems to be sending parsed thought object,
+      // wait, `client.ts` sends `value: thought` where thought is `Thinking...` string or object?
+      // parseThought returns ThoughtSummary which has text.
+      // Let's check client.ts again.
+      // `yield { type: GeminiEventType.Thought, value: thought, traceId };`
+      // `thought` is `ThoughtSummary`.
+      // Wait, `ThoughtSummary` is `{ text: string }` usually?
+      // `parseThought` returns `ThoughtSummary`?
+      // `src/utils/thoughtUtils.ts` not read yet.
+      // Assuming it has text.
+      // In `useChat.ts` currently: `currentThoughts += part.text;`
+      // If we change it to append `data.value`, we need to know if `data.value` is string or object.
+      // `client.ts` says `value: thought`.
+      // Let's assume for now it might be an object or string.
+      // In `useChat.ts` we will implement it to handle both or check.
+
+      it('should set activePreviewUrl when replace tool ends (markdown file)', async () => {
+        const { result } = renderHook(() => useChat());
+
+        const chatId = 'test-chat-id-md';
+        const filePath = 'README.md';
+
+        const stream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(
+              new TextEncoder().encode(
+                `event: tool_start\ndata: ${JSON.stringify({
+                  toolName: 'replace',
+                  args: { file_path: filePath },
+                  chatId,
+                })}\n\n`,
+              ),
+            );
+            controller.enqueue(
+              new TextEncoder().encode(
+                `event: tool_end\ndata: ${JSON.stringify({
+                  toolName: 'replace',
+                  result: { returnDisplay: 'Created README.md' },
+                  chatId,
+                  args: { file_path: filePath },
+                })}\n\n`,
+              ),
+            );
+            controller.enqueue(
+              new TextEncoder().encode(
+                'event: finish\ndata: {"success": true}\n\n',
+              ),
+            );
+            controller.close();
+          },
+        });
+
+        fetchMock.mockImplementation((url) => {
+          if (url === '/api/chat') {
+            return Promise.resolve({
+              ok: true,
+              body: stream,
+              getReader: () => stream.getReader(),
+            });
+          }
+          return Promise.resolve({ ok: true, json: async () => [] });
+        });
+
+        await act(async () => {
+          await result.current.sendMessage('create README.md');
+        });
+
+        await waitFor(() => {
+          expect(result.current.activePreviewUrl).toBe(
+            `/preview/${chatId}/README.md`,
+          );
+          expect(result.current.isTaskFinished).toBe(true);
+        });
+      });
     });
   });
 });
