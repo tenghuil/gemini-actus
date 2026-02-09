@@ -88,6 +88,7 @@ export interface CliArgs {
   startupMessages?: string[];
   rawOutput: boolean | undefined;
   acceptRawOutputRisk: boolean | undefined;
+  browserUserDataDir: string | undefined;
   isCommand: boolean | undefined;
 }
 
@@ -264,6 +265,11 @@ export async function parseArguments(
         .option('accept-raw-output-risk', {
           type: 'boolean',
           description: 'Suppress the security warning when using --raw-output.',
+        })
+        .option('browser-user-data-dir', {
+          type: 'string',
+          description:
+            'Path to a Chrome user data directory to persist browser state.',
         }),
     )
     // Register MCP subcommands
@@ -790,6 +796,9 @@ export async function loadCliConfig(
     disableLLMCorrection: settings.tools?.disableLLMCorrection,
     rawOutput: argv.rawOutput,
     acceptRawOutputRisk: argv.acceptRawOutputRisk,
+    browserUserDataDir: argv.browserUserDataDir
+      ? resolvePath(argv.browserUserDataDir)
+      : undefined,
     modelConfigServiceConfig: settings.modelConfigs,
     // TODO: loading of hooks based on workspace trust
     enableHooks:

@@ -45,11 +45,11 @@ class BrowserManager {
   private page: puppeteer.Page | null = null;
   private chrome: chromeLauncher.LaunchedChrome | null = null;
 
-  private constructor() {}
+  private constructor(private readonly config: Config) {}
 
-  static getInstance(): BrowserManager {
+  static getInstance(config: Config): BrowserManager {
     if (!BrowserManager.instance) {
-      BrowserManager.instance = new BrowserManager();
+      BrowserManager.instance = new BrowserManager(config);
     }
     return BrowserManager.instance;
   }
@@ -88,8 +88,17 @@ class BrowserManager {
     }
 
     // Find Chrome
+    if (typeof this.config.browserUserDataDir === 'string') {
+      try {
+        fs.mkdirSync(this.config.browserUserDataDir, { recursive: true });
+      } catch (e) {
+        debugLogger.warn(`Error creating user data dir: ${getErrorMessage(e)}`);
+      }
+    }
+
     this.chrome = await chromeLauncher.launch({
       chromeFlags,
+      userDataDir: this.config.browserUserDataDir || true,
     });
 
     this.browser = await puppeteer.connect({
@@ -167,7 +176,7 @@ class BrowserToolInvocation extends BaseToolInvocation<
 
   async execute(_: AbortSignal): Promise<ToolResult> {
     try {
-      const manager = BrowserManager.getInstance();
+      const manager = BrowserManager.getInstance(this.config);
 
       if (this.params.action === 'close') {
         await manager.close();

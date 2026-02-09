@@ -413,6 +413,7 @@ export interface ConfigParameters {
   blockedEnvironmentVariables?: string[];
   enableEnvironmentVariableRedaction?: boolean;
   noBrowser?: boolean;
+  browserUserDataDir?: string;
   summarizeToolOutput?: Record<string, SummarizeToolOutputSettings>;
   folderTrust?: boolean;
   ideMode?: boolean;
@@ -540,6 +541,7 @@ export class Config {
   private previewFeatures: boolean | undefined;
   private hasAccessToPreviewModel: boolean = false;
   private readonly noBrowser: boolean;
+  readonly browserUserDataDir: string | undefined;
   private readonly folderTrust: boolean;
   private ideMode: boolean;
 
@@ -789,6 +791,8 @@ export class Config {
     this.extensionManagement = params.extensionManagement ?? true;
     this.enableExtensionReloading = params.enableExtensionReloading ?? false;
     this.storage = new Storage(this.targetDir);
+
+    this.browserUserDataDir = params.browserUserDataDir;
 
     this.fakeResponses = params.fakeResponses;
     this.recordResponses = params.recordResponses;
