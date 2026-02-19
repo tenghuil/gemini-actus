@@ -28,7 +28,8 @@ export async function sendAsyncMessage(
       universeDomain: 'googleapis.com',
     });
 
-    let authClient = await auth.getClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let authClient: any = await auth.getClient();
     // Force set universeDomain if it's missing, to satisfy Impersonated credentials check
     if (!('universeDomain' in authClient)) {
       (authClient as unknown as { universeDomain: string }).universeDomain =
@@ -41,8 +42,7 @@ export async function sendAsyncMessage(
       logger.info(`Impersonating Service Account: ${saEmail}`);
       const { Impersonated } = await import('google-auth-library');
       authClient = new Impersonated({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sourceClient: authClient as any,
+        sourceClient: authClient,
         targetPrincipal: saEmail,
         lifetime: 3600,
         delegates: [],
@@ -56,8 +56,7 @@ export async function sendAsyncMessage(
     }
 
     const chat = new chat_v1.Chat({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      auth: authClient as any,
+      auth: authClient,
     });
 
     await chat.spaces.messages.create({
