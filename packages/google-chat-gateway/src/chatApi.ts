@@ -13,14 +13,22 @@ export async function sendAsyncMessage(
   text: string,
 ): Promise<void> {
   try {
+    // Check if we need to impersonate a service account
+    const saEmail = process.env['GOOGLE_CHAT_SA_EMAIL'];
+
+    // We need 'https://www.googleapis.com/auth/cloud-platform' to be able to impersonate.
+    // If we are NOT impersonating (saEmail is undefined), we need 'chat.messages' and 'chat.spaces' to act as a user.
+    const scopes = ['https://www.googleapis.com/auth/cloud-platform'];
+    if (!saEmail) {
+      scopes.push('https://www.googleapis.com/auth/chat.messages');
+      scopes.push('https://www.googleapis.com/auth/chat.spaces');
+    }
+
     // Uses Google Application Default Credentials from the environment.
     // Explicitly using GoogleAuth to verify credentials
     // We start by getting the source credentials (which should be the user's ADC)
     const auth = new googleAuth.GoogleAuth({
-      // We do NOT ask for chat.bot scope here for the user credential,
-      // as the user credential itself might not be allowed to have it directly if it's not a service account.
-      // Instead, we need the 'https://www.googleapis.com/auth/cloud-platform' scope to be able to impersonate.
-      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+      scopes,
       projectId:
         process.env['GOOGLE_CLOUD_PROJECT'] ||
         process.env['GOOGLE_CLOUD_PROJECT_NUMBER'],
@@ -36,8 +44,6 @@ export async function sendAsyncMessage(
         'googleapis.com';
     }
 
-    // Check if we need to impersonate a service account
-    const saEmail = process.env['GOOGLE_CHAT_SA_EMAIL'];
     if (saEmail) {
       logger.info(`Impersonating Service Account: ${saEmail}`);
       const { Impersonated } = await import('google-auth-library');
@@ -51,7 +57,7 @@ export async function sendAsyncMessage(
       });
     } else {
       logger.warn(
-        'GOOGLE_CHAT_SA_EMAIL not set. Attempting to use credentials directly.',
+        'GOOGLE_CHAT_SA_EMAIL not set. Using credentials directly with chat.messages and chat.spaces scopes.',
       );
     }
 
