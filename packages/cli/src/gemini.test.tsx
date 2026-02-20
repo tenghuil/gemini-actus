@@ -498,6 +498,7 @@ describe('gemini.tsx main function kitty protocol', () => {
       acceptRawOutputRisk: undefined,
       isCommand: undefined,
       browserUserDataDir: undefined,
+      browserExecutionMode: undefined,
     });
 
     await act(async () => {

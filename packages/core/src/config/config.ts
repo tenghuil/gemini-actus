@@ -413,6 +413,7 @@ export interface ConfigParameters {
   blockedEnvironmentVariables?: string[];
   enableEnvironmentVariableRedaction?: boolean;
   noBrowser?: boolean;
+  browserExecutionMode?: 'puppeteer' | 'extension';
   browserUserDataDir?: string;
   summarizeToolOutput?: Record<string, SummarizeToolOutputSettings>;
   folderTrust?: boolean;
@@ -541,6 +542,7 @@ export class Config {
   private previewFeatures: boolean | undefined;
   private hasAccessToPreviewModel: boolean = false;
   private readonly noBrowser: boolean;
+  readonly browserExecutionMode: 'puppeteer' | 'extension';
   readonly browserUserDataDir: string | undefined;
   private readonly folderTrust: boolean;
   private ideMode: boolean;
@@ -793,6 +795,7 @@ export class Config {
     this.storage = new Storage(this.targetDir);
 
     this.browserUserDataDir = params.browserUserDataDir;
+    this.browserExecutionMode = params.browserExecutionMode ?? 'puppeteer';
 
     this.fakeResponses = params.fakeResponses;
     this.recordResponses = params.recordResponses;
