@@ -89,6 +89,7 @@ export interface CliArgs {
   rawOutput: boolean | undefined;
   acceptRawOutputRisk: boolean | undefined;
   browserUserDataDir: string | undefined;
+  browserExecutionMode: string | undefined;
   isCommand: boolean | undefined;
 }
 
@@ -270,6 +271,11 @@ export async function parseArguments(
           type: 'string',
           description:
             'Path to a Chrome user data directory to persist browser state.',
+        })
+        .option('browser-execution-mode', {
+          type: 'string',
+          choices: ['puppeteer', 'extension'],
+          description: 'Browser execution mode.',
         }),
     )
     // Register MCP subcommands
@@ -799,6 +805,11 @@ export async function loadCliConfig(
     browserUserDataDir: argv.browserUserDataDir
       ? resolvePath(argv.browserUserDataDir)
       : undefined,
+    browserExecutionMode: argv.browserExecutionMode as
+      | 'puppeteer'
+      | 'extension'
+      | 'auto'
+      | undefined,
     modelConfigServiceConfig: settings.modelConfigs,
     // TODO: loading of hooks based on workspace trust
     enableHooks:
