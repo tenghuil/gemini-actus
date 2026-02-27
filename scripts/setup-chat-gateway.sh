@@ -9,7 +9,16 @@ echo "Starting Google Chat App configuration..."
 # 1. Get current project
 PROJECT_ID=$1
 if [ -z "$PROJECT_ID" ]; then
-  PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
+  DETECTED_PROJECT=$(gcloud config get-value project 2>/dev/null)
+  
+  if [ -n "$DETECTED_PROJECT" ] && [ "$DETECTED_PROJECT" != "(unset)" ]; then
+    read -p "Detected Google Cloud Project: $DETECTED_PROJECT. Do you want to use this project? [Y/n]: " CONFIRM_PROJECT
+    if [[ "$CONFIRM_PROJECT" =~ ^[Nn] ]]; then
+      read -p "Please enter your Google Cloud Project ID: " PROJECT_ID
+    else
+      PROJECT_ID=$DETECTED_PROJECT
+    fi
+  fi
 fi
 
 if [ -z "$PROJECT_ID" ] || [ "$PROJECT_ID" == "(unset)" ]; then
