@@ -4,46 +4,43 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import express from 'express';
 import dotenv from 'dotenv';
 import path from 'node:path';
+import { logger } from './logger.js';
+import { GatewayClient } from './client.js';
 
-// Load environment variables immediately from the root of the monorepo
+// Load environment variables
 dotenv.config({ path: path.resolve(process.cwd(), '../../.env') });
 
-import { logger } from './logger.js';
-import { googleChatRoutes } from './routes.js';
-import { startPubSubSubscriber } from './pubsub.js';
+const args = process.argv.slice(2);
+let pairingCode = '';
+let serverUrl = process.env['GOOGLE_CHAT_SERVER_URL'] || 'ws://localhost:8080';
 
-const app = express();
-const port = process.env['PORT'] || 3000;
-
-app.use(express.json());
-
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
-});
-
-app.use('/google-chat', googleChatRoutes);
-
-// A placeholder for the direct webhook at root if necessary
-app.post('/', (req, res, next) => {
-  // Pass it to the googleChatRoutes
-  req.url = '/webhook';
-  googleChatRoutes(req, res, next);
-});
-
-const projectId = process.env['PROJECT_ID'];
-const subscriptionId = process.env['SUBSCRIPTION_ID'];
-
-if (projectId && subscriptionId) {
-  startPubSubSubscriber(projectId, subscriptionId);
-} else {
-  logger.info(
-    'PROJECT_ID or SUBSCRIPTION_ID not set. Pub/Sub subscriber will not start.',
-  );
+// Simple arg parsing logic
+for (let i = 0; i < args.length; i++) {
+  if (args[i] === '--server' && args[i + 1]) {
+    serverUrl = args[i + 1];
+    i++;
+  } else if (!args[i].startsWith('-') && !pairingCode) {
+    pairingCode = args[i];
+  }
 }
 
-app.listen(port, () => {
-  logger.info(`[Google Chat Gateway] Server started on port ${port}`);
+if (!pairingCode) {
+  logger.error('Please provide a pairing code.');
+  logger.info('Usage: gemini-actus connect-chat <pairing-code>');
+  process.exit(1);
+}
+
+logger.info(`Starting Gemini Actus Chat Gateway...`);
+logger.info(`Server: ${serverUrl}`);
+logger.info(`Pairing Code: ${pairingCode}`);
+
+const client = new GatewayClient(serverUrl, pairingCode);
+client.connect();
+
+// Keep process alive
+process.on('SIGINT', () => {
+  logger.info('Shutting down...');
+  process.exit(0);
 });

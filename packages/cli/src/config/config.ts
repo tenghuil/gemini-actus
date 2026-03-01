@@ -12,6 +12,7 @@ import { extensionsCommand } from '../commands/extensions.js';
 import { skillsCommand } from '../commands/skills.js';
 import { hooksCommand } from '../commands/hooks.js';
 import { webCommand } from '../commands/web.js';
+import { connectChatCommand } from '../commands/connectChat.js';
 import {
   Config,
   setGeminiMdFilename as setServerGeminiMdFilename,
@@ -325,6 +326,7 @@ export async function parseArguments(
     yargsInstance.command(hooksCommand);
   }
   yargsInstance.command(webCommand);
+  yargsInstance.command(connectChatCommand);
 
   yargsInstance
     .version(await getVersion()) // This will enable the --version flag based on package.json

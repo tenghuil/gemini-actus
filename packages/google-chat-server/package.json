@@ -1,40 +1,39 @@
 {
-  "name": "@google/gemini-actus-google-chat-gateway",
-  "version": "0.28.0-nightly.20260128.adc8e11bb",
-  "description": "Google Chat Gateway",
+  "name": "@google/gemini-actus-chat-server",
+  "version": "0.1.0",
+  "description": "Google Chat Server for Gemini Actus",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/google-gemini/gemini-actus.git",
-    "directory": "packages/google-chat-gateway"
+    "directory": "packages/google-chat-server"
   },
   "type": "module",
-  "main": "dist/client.js",
+  "main": "dist/src/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "start": "NODE_OPTIONS='--no-deprecation' node dist/src/index.js",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
-  "exports": {
-    ".": "./dist/src/index.js",
-    "./client": "./dist/client.js"
-  },
   "files": [
     "dist"
   ],
   "dependencies": {
-    "@a2a-js/sdk": "^0.3.8",
-    "@types/ws": "^8.18.1",
+    "@types/node-fetch": "^2.6.13",
     "dotenv": "^16.4.5",
+    "express": "^5.1.0",
+    "google-auth-library": "^9.6.3",
+    "node-fetch": "^3.3.2",
     "uuid": "^9.0.1",
     "winston": "^3.17.0",
-    "ws": "^8.19.0"
+    "ws": "^8.16.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.5.10",
     "typescript": "^5.3.3",
     "vitest": "^3.1.1"
   },

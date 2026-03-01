@@ -10,7 +10,8 @@
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "gemini": "dist/index.js"
+    "gemini": "dist/index.js",
+    "gemini-actus": "dist/index.js"
   },
   "scripts": {
     "build": "node ../../scripts/build_package.js",
@@ -30,6 +31,7 @@
   },
   "dependencies": {
     "@agentclientprotocol/sdk": "^0.12.0",
+    "@google/gemini-actus-a2a-server": "file:../a2a-server",
     "@google/gemini-actus-core": "file:../core",
     "@google/gemini-actus-web": "file:../web",
     "@google/genai": "1.30.0",
@@ -51,6 +53,7 @@
     "extract-zip": "^2.0.1",
     "fzf": "^0.5.2",
     "glob": "^12.0.0",
+    "google-auth-library": "^10.6.1",
     "highlight.js": "^11.11.1",
     "ink": "npm:@jrichman/ink@6.4.8",
     "ink-gradient": "^3.0.0",
