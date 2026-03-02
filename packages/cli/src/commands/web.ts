@@ -12,7 +12,7 @@ import { createServer } from 'node:http';
 // import { WebSocketServer } from 'ws';
 import { debugLogger } from '@google/gemini-actus-core';
 import type { Config, GeminiClient } from '@google/gemini-actus-core';
-import { createRequire } from 'node:module';
+import { createRequire as webCreateRequire } from 'node:module';
 import { loadSettings } from '../config/settings.js';
 import { loadCliConfig, type CliArgs } from '../config/config.js';
 import { initializeApp } from '../core/initializer.js';
@@ -20,7 +20,7 @@ import type { FunctionCall, Content, Part } from '@google/genai';
 import { HistoryManager } from '../utils/history.js';
 import { setupFileSystemRoutes } from './web-routes.js';
 
-const require = createRequire(import.meta.url);
+const require = webCreateRequire(import.meta.url);
 
 export const webCommand: CommandModule = {
   command: 'web',

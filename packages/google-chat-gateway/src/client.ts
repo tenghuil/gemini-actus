@@ -4,60 +4,44 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import WebSocket from 'ws';
-import type { ClientOptions } from 'ws';
+import { PubSub } from '@google-cloud/pubsub';
+import type { Message } from '@google-cloud/pubsub';
 import { logger } from './logger.js';
 import { askAgent } from './agentClient.js';
 import type { AgentRequestPacket, AgentResponsePacket } from './types.js';
 
 export class GatewayClient {
-  private ws: WebSocket | null = null;
-  private reconnectTimer: NodeJS.Timeout | null = null;
-  private pairingCode: string;
-  private serverUrl: string;
-  private token?: string;
+  private pubsub: PubSub;
 
-  constructor(serverUrl: string, pairingCode: string, token?: string) {
-    this.serverUrl = serverUrl;
-    this.pairingCode = pairingCode;
-    this.token = token;
+  constructor(serverUrl: string, projectId: string) {
+    this.pubsub = new PubSub({ projectId });
   }
 
-  connect() {
-    const url = `${this.serverUrl}?code=${this.pairingCode}`;
-    logger.info(`Connecting to ${this.serverUrl}...`);
+  async connect(email: string) {
+    const safeEmail = email.replace(/[^a-zA-Z0-9]/g, '-');
+    const subName = `chat-ingress-sub-${safeEmail}`;
 
-    const options: ClientOptions = {};
-    if (this.token) {
-      options.headers = {
-        Authorization: `Bearer ${this.token}`,
-      };
-    }
+    logger.info(
+      `Starting Gateway Client. Listening on subscription: ${subName}`,
+    );
 
-    // Debug logging for connection options
-    logger.info(`WebSocket Options: ${JSON.stringify(options, null, 2)}`);
+    const subscription = this.pubsub.subscription(subName);
 
-    this.ws = new WebSocket(url, options);
-
-    this.ws.on('open', () => {
-      logger.info('Connected to Google Chat Server');
-      // Clear any reconnect timer if we successfully connected
-      if (this.reconnectTimer) {
-        clearTimeout(this.reconnectTimer);
-        this.reconnectTimer = null;
-      }
-    });
-
-    this.ws.on('message', async (data) => {
+    subscription.on('message', async (message: Message) => {
       try {
-        const packet = JSON.parse(data.toString()) as AgentRequestPacket;
+        const dataStr = message.data.toString('utf8');
+        const packet = JSON.parse(dataStr) as AgentRequestPacket;
+
         if (packet.kind === 'agent-request') {
           logger.info(`Received prompt: ${packet.prompt}`);
+
+          // Acknowledge the message so it's not redelivered
+          message.ack();
 
           // Execute Agent Logic
           const response = await askAgent(packet.prompt);
 
-          // Send Response back
+          // Send Response back via egress topic
           const reply: AgentResponsePacket = {
             kind: 'agent-response',
             id: packet.id,
@@ -65,45 +49,24 @@ export class GatewayClient {
             spaceName: packet.spaceName,
             threadName: packet.threadName,
           };
-          if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify(reply));
-          } else {
-            logger.warn('Cannot send response: WebSocket not open');
-          }
+
+          const egressTopic = this.pubsub.topic('chat-egress');
+          await egressTopic.publishMessage({
+            data: Buffer.from(JSON.stringify(reply)),
+          });
+          logger.info('Reply sent to egress topic.');
+        } else {
+          message.ack();
         }
       } catch (e) {
         logger.error('Error handling message from server', e);
+        // Nack to retry if processing fails completely
+        message.nack();
       }
     });
 
-    this.ws.on('close', (code, reason) => {
-      logger.warn(`Connection closed: ${code} - ${reason}`);
-      this.ws = null;
-      if (code === 1008) {
-        logger.error('Invalid pairing code. Please generate a new one.');
-        process.exit(1);
-      } else {
-        this.scheduleReconnect();
-      }
+    subscription.on('error', (error) => {
+      logger.error('Received error from subscription:', error);
     });
-
-    this.ws.on('error', (err) => {
-      logger.error('Connection error', err);
-      // 'close' event usually follows 'error', so we rely on that for reconnect logic
-      // but just in case:
-      if (!this.ws) {
-        this.scheduleReconnect();
-      }
-    });
-  }
-
-  private scheduleReconnect() {
-    if (!this.reconnectTimer) {
-      logger.info('Scheduling reconnect in 5s...');
-      this.reconnectTimer = setTimeout(() => {
-        this.reconnectTimer = null;
-        this.connect();
-      }, 5000);
-    }
   }
 }

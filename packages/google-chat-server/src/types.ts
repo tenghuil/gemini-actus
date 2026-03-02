@@ -4,14 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { WebSocket } from 'ws';
-
-export interface AgentConnection {
-  socket: WebSocket;
-  userId: string;
-  connectedAt: Date;
-}
-
 export interface ChatEvent {
   chat?: {
     messagePayload?: {

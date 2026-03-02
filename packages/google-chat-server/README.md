@@ -1,104 +1,188 @@
 # Google Chat Server
 
-This package implements the Cloud Run service that acts as the "Switchboard"
-between Google Chat and local Gemini Actus agents.
+This package implements the Cloud Run service and Pub/Sub architecture that acts
+as the "Switchboard" between Google Chat and local Gemini Actus agents.
 
 ## Architecture
 
-1.  **Cloud Run Server** (`packages/google-chat-server`):
-    - Receives HTTP Webhooks from Google Chat (`/webhook`).
-    - Hosting a WebSocket server for local agents to connect.
-    - Manages pairing codes and routing messages between Chat and Local Agents.
-    - Protected by Cloud Run IAM (requires `Authorization: Bearer ID_TOKEN` for
-      WebSocket handshake).
+1.  **Cloud Run Service** (`packages/google-chat-server`):
+    - `webhook` (`/webhook`): Receives HTTP Webhooks from Google Chat. Validates
+      the user in Firestore and publishes messages to the `chat-ingress` Pub/Sub
+      topic.
+    - `register` (`/register`): Receives an authenticated registration request
+      from the CLI. It creates a uniquely filtered Pub/Sub subscription for the
+      user, grants them IAM access, and marks them as paired in Firestore.
+    - `egress` (`/egress`): An HTTP endpoint triggered by a Pub/Sub Push
+      Subscription on the `chat-egress` topic. It receives replies from the
+      local agents and posts them back to Google Chat.
 
 2.  **Local Gateway** (part of `packages/cli`):
     - Runs on the user's machine via `gemini-actus connect-chat`.
-    - Connects to the Cloud Run WebSocket.
+    - Authenticates the user and calls the `/register` endpoint on the Cloud Run
+      service.
+    - Starts a Pub/Sub client listening to their unique pull subscription.
     - Starts an in-process Agent Server (`@google/gemini-actus-a2a-server`) to
       execute tasks.
 
-## Deployment to Cloud Run
+## Deployment to Google Cloud
 
 Prerequisites:
 
-- Google Cloud Project with Cloud Run API enabled.
-- `gcloud` CLI installed and authenticated.
+- Google Cloud Project with Cloud Run, Pub/Sub, and Firestore APIs enabled.
+- `gcloud` CLI installed and authenticated as the developer.
 
-### 1. Build the Package
+### 1. Initialize Firestore Database
 
-From the monorepo root:
+The server uses Firestore to persist user pairing statuses. If your GCP project
+does not already have a default Firestore database, create one:
 
 ```bash
-npm run build --workspace=@google/gemini-actus-chat-server
+gcloud firestore databases create --project=$PROJECT_ID --location=us-central1 --type=firestore-native
 ```
 
-### 2. Deploy
+### 2. Deploy Script
 
-Deploy the service using `gcloud`. Note that we allow unauthenticated
-invocations for the HTTP webhook (Google Chat needs to reach it), but the
-WebSocket endpoint enforces IAM via the application logic if needed (currently
-relies on `roles/run.invoker` if you lock it down, but for public Chat bots,
-"Allow unauthenticated" is often required for the webhook).
-
-_Note: In this specific implementation, we used `--allow-unauthenticated` to
-ensure Google Chat can hit the webhook, but the WebSocket client in the CLI is
-configured to send an OIDC token to support authenticated scenarios if you
-choose to enable IAM._
+We have provided a deployment script that will automatically create the Pub/Sub
+topics, deploy the Cloud Run service, and configure the Push Subscription for
+egress. Run this script from the `packages/google-chat-server` directory:
 
 ```bash
-gcloud run deploy gemini-chat-server \
-  --source packages/google-chat-server \
-  --platform managed \
+./scripts/deploy.sh
+```
+
+The script will prompt you for your `Project ID` and `Region`. It will output
+the `Register Endpoint URL` and `Webhook URL` at the end. Share the Register URL
+with your users and configure your Google Chat Bot with the Webhook URL.
+
+### 3. Required IAM Permissions for Cloud Run
+
+By default, Cloud Run uses the Compute Engine default service account. For the
+server to correctly provision resources and route messages, its service account
+**must** have the following IAM roles in your GCP project:
+
+- **Pub/Sub Admin (`roles/pubsub.admin`)**: Required to create subscriptions and
+  modify IAM policies for new users during `/register`.
+- **Cloud Datastore User (`roles/datastore.user`)**: Required to read/write
+  pairing status to Firestore.
+
+If your project restricts public Cloud Run invocations, you must also explicitly
+grant the **Google Chat API** permission to invoke your webhook.
+
+To grant all these permissions, you can run:
+
+```bash
+PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
+SERVICE_ACCOUNT="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
+
+# Grant Pub/Sub Admin and Datastore User to the Cloud Run service account
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="serviceAccount:${SERVICE_ACCOUNT}" \
+  --role="roles/pubsub.admin"
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="serviceAccount:${SERVICE_ACCOUNT}" \
+  --role="roles/datastore.user"
+
+# Allow the Google Chat API to invoke the Cloud Run Webhook
+gcloud run services add-iam-policy-binding google-chat-server \
   --region us-central1 \
-  --allow-unauthenticated \
-  --set-env-vars GOOGLE_CLOUD_PROJECT=your-project-id
+  --member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-gsuiteaddons.iam.gserviceaccount.com" \
+  --role="roles/run.invoker"
 ```
 
-## Running the Local Agent
+### 4. Configuring the Google Chat API
 
-To pair your local agent with the Google Chat bot:
+1. Open the [Google Cloud Console](https://console.cloud.google.com).
+2. Ensure you are in the correct Project (`$PROJECT_ID`).
+3. Search for **"Google Chat API"** and click **Enable**.
+4. Once enabled, click **Manage** -> **Configuration**.
+5. Under **App Information**:
+   - Provide an **App name** (e.g., "Gemini Actus Agent").
+   - Provide an **Avatar URL** (any image URL).
+   - Provide a **Description**.
+6. Under **Interactive features**:
+   - Check **Receive 1:1 messages** and **Join spaces and group conversations**.
+   - Under **Connection settings**, select **App URL**.
+   - Paste the **Webhook URL** returned by the deploy script into the App URL
+     field (e.g., `https://google-chat-server-...run.app/webhook`).
+7. Under **Visibility**:
+   - Make the application available to specific people or your entire workspace,
+     as needed.
+8. Click **Save**.
 
-1.  **Initiate Pairing**:
-    - Send `/pair` to the Google Chat bot.
-    - It will reply with a command: `Run gemini-actus connect-chat <code>`.
+Your Google Chat bot is now live and waiting for webhooks.
 
-2.  **Connect**:
-    - Run the command in your terminal:
+## Running the Local Agent & Pairing
 
-      ```bash
-      # If running from source
-      node packages/cli/dist/index.js connect-chat <code> --server <YOUR_CLOUD_RUN_URL>
+To pair your local agent with the Google Chat bot, you don't need to request a
+pairing code manually. Instead, the CLI automatically registers your Google
+Identity with the server.
 
-      # If installed globally
-      gemini-actus connect-chat <code> --server <YOUR_CLOUD_RUN_URL>
-      ```
+1.  **Authenticate**: Ensure you are logged into Google Cloud locally with the
+    exact Google Account you will use to send messages in Google Chat:
 
-3.  **Usage**:
-    - Send messages to the bot in Google Chat.
-    - The local agent will process them and reply.
+    ```bash
+    gcloud auth login
+    ```
+
+2.  **Connect & Register**: Run the command in your terminal using the
+    Developer's Project ID and Register URL:
+
+    ```bash
+    # If running from source
+    node packages/cli/dist/index.js connect-chat --server <DEVELOPER_REGISTER_URL> --project <DEVELOPER_PROJECT_ID>
+
+    # If installed globally
+    gemini-actus connect-chat --server <DEVELOPER_REGISTER_URL> --project <DEVELOPER_PROJECT_ID>
+    ```
+
+    _What happens here:_ The CLI fetches your ID token and calls the `/register`
+    endpoint on the Cloud Run server. The server automatically provisions a
+    uniquely filtered Pub/Sub subscription for your email address, grants your
+    account IAM access to it, and marks you as "paired" in its Firestore
+    database.
+
+3.  **Start Chatting**:
+    - Open Google Chat and find the bot you configured.
+    - Send it a message. The `webhook` endpoint will identify your email, check
+      Firestore to confirm you are paired, and instantly route the message to
+      your uniquely filtered Pub/Sub subscription.
+    - Your local agent will receive the message securely, process it, and reply
+      back to the chat thread.
+
+## Tenant Isolation & Security
+
+This architecture uses Pub/Sub server-side filtering to guarantee message
+isolation between users.
+
+- Each user gets their own subscription (e.g., `chat-ingress-sub-userA`).
+- The subscription is created with a filter:
+  `attributes.target_user_email = "userA@email.com"`.
+- The webhook guarantees the `target_user_email` attribute matches the Google
+  Chat sender.
+- IAM permissions are applied at the subscription level, meaning `userA` can
+  only read from their own subscription and cannot read other users' messages on
+  the `chat-ingress` topic.
 
 ## Troubleshooting
 
-### WebSocket 403 Forbidden
+### Authentication Failed
 
-If the CLI fails to connect with "Unexpected server response: 403":
+Ensure the user running `gemini-actus connect-chat` is authenticated with
+`gcloud auth login` and that their Google Identity can generate a valid ID
+token.
 
-- Ensure your user account has `roles/run.invoker` on the Cloud Run service.
-- The CLI attempts to fetch an OIDC ID token automatically. If it fails, it
-  falls back to `gcloud auth print-identity-token`.
-- Run `gcloud auth login` to ensure you present valid credentials.
+### Cannot Receive Messages
 
-### Agent Connection Refused
+- Verify the user's email is correctly logged as `paired: true` in Firestore
+  under the `agents` collection.
+- Verify the user's Pub/Sub subscription exists in the Developer GCP project and
+  has the correct `attributes.target_user_email` filter.
+- Ensure the user's account has the `roles/pubsub.subscriber` role on their
+  specific subscription.
 
-If the bot says "Error communicating with Agent" or logs `ECONNREFUSED`:
+### Egress Fails
 
-- The CLI is responsible for starting the local A2A agent server.
-- Ensure `packages/cli` has been built with the
-  `@google/gemini-actus-a2a-server` dependency.
-- The `connect-chat` command should log "Agent Server running on port ...".
-
-### "Command not found"
-
-If `gemini-actus` is not found, ensuring you have run `npm run build` in
-`packages/cli` and `npm link` (or use the full path to `dist/index.js`).
+The `egress` Cloud Function uses the Google Chat API to reply. Ensure the Cloud
+Function's service account has the necessary permissions (e.g.,
+`roles/chat.bot`) or scopes to post messages back to the space.

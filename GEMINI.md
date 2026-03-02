@@ -39,6 +39,11 @@ This file (`GEMINI.md`) serves as the **Project Context** for the agent.
   - `packages/core/src/tools/`: Built-in tools for file system, shell, and web
     operations.
   - `packages/a2a-server`: Experimental Agent-to-Agent server.
+  - `packages/google-chat-server`: Cloud Run service (Switchboard) and
+    deployment scripts routing messages between Google Chat and local agents via
+    Pub/Sub.
+  - `packages/google-chat-gateway`: Local Pub/Sub client that listens to the
+    cloud switchboard.
   - `packages/vscode-ide-companion`: VS Code extension pairing with the CLI.
 
 ## Building and Running
