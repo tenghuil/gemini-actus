@@ -31,6 +31,7 @@ npm install && npm run build
 | **Terminal with Yolo Mode(Recommended)** | `npm run start -- --yolo`    | Fully automated execution (no confirmation prompts).      |
 | **Terminal**                             | `npm run start`              | Default interactive CLI mode.                             |
 | **Web UI**                               | `npm run start -- web --dev` | Launches backend (port 3333) & frontend (localhost:3000). |
+| **Daemon Mode**                          | `npm run start -- onboard --install-daemon --yolo` | Installs and runs the Actus Agent as a background daemon (with auto-execution enabled) + gmail chatapi gateway setuped . |
 
 #### Run Separately (Development)
 
