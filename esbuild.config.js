@@ -87,6 +87,10 @@ const cliConfig = {
   plugins: createWasmPlugins(),
   alias: {
     'is-in-ci': path.resolve(__dirname, 'packages/cli/src/patches/is-in-ci.ts'),
+    '@google/gemini-actus-google-chat-gateway/client': path.resolve(
+      __dirname,
+      'packages/google-chat-gateway/client.ts',
+    ),
   },
   metafile: true,
 };
