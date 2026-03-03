@@ -1,0 +1,54 @@
+name: Build SEA Executables
+
+on:
+  push:
+    branches: [ "switchboard" ]
+  pull_request:
+    branches: [ "switchboard" ]
+  workflow_dispatch: # Allows you to manually trigger the workflow from the GitHub UI
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [20.x] # Node 20 is required for SEA
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      # Using --ignore-scripts first to ensure lockfile and basic deps are in place
+      # before running the workspace prepare scripts to bypass potential issues.
+      run: |
+        npm ci --ignore-scripts
+        npm run prepare
+
+    - name: Build Executable
+      run: npm run build:executable
+
+    - name: Rename Executable (Unix)
+      if: runner.os != 'Windows'
+      run: mv gemini-agent gemini-agent-${{ runner.os }}-${{ runner.arch }}
+
+    - name: Rename Executable (Windows)
+      if: runner.os == 'Windows'
+      # Using PowerShell or CMD depends on the shell.
+      # By default, windows-latest uses PowerShell.
+      run: Rename-Item -Path "gemini-agent.exe" -NewName "gemini-agent-${{ runner.os }}-${{ runner.arch }}.exe"
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: gemini-agent-${{ runner.os }}-${{ runner.arch }}
+        path: gemini-agent-*
+        retention-days: 7

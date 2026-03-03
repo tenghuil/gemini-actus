@@ -62,3 +62,7 @@ gemini-debug.log
 .eslintcache
 evals/logs/
 .workspace/
+
+# SEA Executables
+gemini-agent
+gemini-agent.exe

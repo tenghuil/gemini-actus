@@ -108,12 +108,27 @@ const a2aServerConfig = {
   plugins: createWasmPlugins(),
 };
 
+const cliCjsConfig = {
+  ...cliConfig,
+  entryPoints: ['packages/cli/agent-entry.ts'],
+  format: 'cjs',
+  outfile: 'bundle/gemini.cjs',
+  banner: {
+    js: `const import_meta_url = typeof __filename !== 'undefined' ? require("url").pathToFileURL(__filename).href : "";`,
+  },
+  define: {
+    ...cliConfig.define,
+    'import.meta.url': 'import_meta_url',
+  },
+};
+
 Promise.allSettled([
   esbuild.build(cliConfig).then(({ metafile }) => {
     if (process.env.DEV === 'true') {
       writeFileSync('./bundle/esbuild.json', JSON.stringify(metafile, null, 2));
     }
   }),
+  esbuild.build(cliCjsConfig),
   esbuild.build(a2aServerConfig),
 ]).then((results) => {
   const [cliResult, a2aResult] = results;
