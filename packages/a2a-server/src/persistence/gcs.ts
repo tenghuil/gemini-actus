@@ -256,7 +256,10 @@ export class GCSTaskStore implements TaskStore {
       }
       const agentSettings = persistedState._agentSettings;
 
-      const workDir = setTargetDir(agentSettings);
+      const workDir = setTargetDir(
+        agentSettings,
+        loadedMetadata._contextId as string | undefined,
+      );
       await fse.ensureDir(workDir);
       const workspaceFile = this.storage
         .bucket(this.bucketName)

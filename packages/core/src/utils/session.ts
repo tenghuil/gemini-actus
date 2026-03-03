@@ -6,4 +6,5 @@
 
 import { randomUUID } from 'node:crypto';
 
-export const sessionId = randomUUID();
+export const sessionId = process.env['GEMINI_SESSION_ID'] || randomUUID();
+process.env['GEMINI_SESSION_ID'] = sessionId;

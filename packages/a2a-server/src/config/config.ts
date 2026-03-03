@@ -159,13 +159,23 @@ export async function loadConfig(
   return config;
 }
 
-export function setTargetDir(agentSettings: AgentSettings | undefined): string {
+export function setTargetDir(
+  agentSettings: AgentSettings | undefined,
+  contextId?: string,
+): string {
   const originalCWD = process.cwd();
-  const targetDir =
+  let targetDir =
     process.env['CODER_AGENT_WORKSPACE_PATH'] ??
     (agentSettings?.kind === CoderAgentEvent.StateAgentSettingsEvent
       ? agentSettings.workspacePath
       : undefined);
+
+  if (!targetDir && contextId) {
+    const homeDir = homedir();
+    if (homeDir) {
+      targetDir = path.join(homeDir, '.actus', 'workspace', contextId);
+    }
+  }
 
   if (!targetDir) {
     return originalCWD;
@@ -177,6 +187,10 @@ export function setTargetDir(agentSettings: AgentSettings | undefined): string {
 
   try {
     const resolvedPath = path.resolve(targetDir);
+    // Create the directory if it doesn't exist
+    if (!fs.existsSync(resolvedPath)) {
+      fs.mkdirSync(resolvedPath, { recursive: true });
+    }
     process.chdir(resolvedPath);
     return resolvedPath;
   } catch (e) {

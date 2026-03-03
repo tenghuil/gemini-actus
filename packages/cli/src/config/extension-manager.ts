@@ -10,7 +10,7 @@ import { stat } from 'node:fs/promises';
 import chalk from 'chalk';
 import { ExtensionEnablementManager } from './extensions/extensionEnablement.js';
 import { type MergedSettings, SettingScope } from './settings.js';
-import { createHash, randomUUID } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { loadInstallMetadata, type ExtensionConfig } from './extension.js';
 import {
   isWorkspaceTrusted,
@@ -23,6 +23,7 @@ import {
   tryParseGithubUrl,
 } from './extensions/github.js';
 import {
+  sessionId,
   Config,
   debugLogger,
   ExtensionDisableEvent,
@@ -107,7 +108,7 @@ export class ExtensionManager extends ExtensionLoader {
     this.telemetryConfig = new Config({
       telemetry: options.settings.telemetry,
       interactive: false,
-      sessionId: randomUUID(),
+      sessionId,
       clientVersion: options.clientVersion ?? 'unknown',
       targetDir: options.workspaceDir,
       cwd: options.workspaceDir,

@@ -96,7 +96,7 @@ export async function getPreviousSession(
   config: Config,
 ): Promise<string | null> {
   try {
-    const chatsDir = path.join(config.storage.getProjectTempDir(), 'chats');
+    const chatsDir = config.getChatsDir();
 
     // Check if chats directory exists
     try {

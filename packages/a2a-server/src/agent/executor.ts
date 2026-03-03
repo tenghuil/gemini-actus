@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Message, Task as SDKTask } from '@a2a-js/sdk';
+import type { Message, Task as SDKTask, Part } from '@a2a-js/sdk';
 import type {
   TaskStore,
   AgentExecutor,
@@ -12,10 +12,15 @@ import type {
   RequestContext,
   ExecutionEventBus,
 } from '@a2a-js/sdk/server';
-import type { ToolCallRequestInfo, Config } from '@google/gemini-actus-core';
+import type {
+  ToolCallRequestInfo,
+  Config,
+  ResumedSessionData,
+} from '@google/gemini-actus-core';
 import {
   GeminiEventType,
   SimpleExtensionLoader,
+  MessageBusType,
 } from '@google/gemini-actus-core';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -89,13 +94,17 @@ export class CoderAgentExecutor implements AgentExecutor {
 
   private async getConfig(
     agentSettings: AgentSettings,
-    taskId: string,
+    contextId: string,
   ): Promise<Config> {
-    const workspaceRoot = setTargetDir(agentSettings);
+    const workspaceRoot = setTargetDir(agentSettings, contextId);
     loadEnvironment(); // Will override any global env with workspace envs
     const settings = loadSettings(workspaceRoot);
     const extensions = loadExtensions(workspaceRoot);
-    return loadConfig(settings, new SimpleExtensionLoader(extensions), taskId);
+    return loadConfig(
+      settings,
+      new SimpleExtensionLoader(extensions),
+      contextId,
+    );
   }
 
   /**
@@ -115,9 +124,9 @@ export class CoderAgentExecutor implements AgentExecutor {
     }
 
     const agentSettings = persistedState._agentSettings;
-    const config = await this.getConfig(agentSettings, sdkTask.id);
     const contextId: string =
       (metadata['_contextId'] as string) || sdkTask.contextId;
+    const config = await this.getConfig(agentSettings, contextId);
     const runtimeTask = await Task.create(
       sdkTask.id,
       contextId,
@@ -139,21 +148,22 @@ export class CoderAgentExecutor implements AgentExecutor {
     contextId: string,
     agentSettingsInput?: AgentSettings,
     eventBus?: ExecutionEventBus,
+    resumedSessionData?: ResumedSessionData,
   ): Promise<TaskWrapper> {
     const agentSettings = agentSettingsInput || ({} as AgentSettings);
     // Allow global auto-execute override via environment variable
     if (process.env['CODER_AGENT_AUTO_EXECUTE'] === 'true') {
       agentSettings.autoExecute = true;
     }
-    const config = await this.getConfig(agentSettings, taskId);
+    const config = await this.getConfig(agentSettings, contextId);
     const runtimeTask = await Task.create(
       taskId,
       contextId,
       config,
       eventBus,
       agentSettings.autoExecute,
+      resumedSessionData,
     );
-    await runtimeTask.geminiClient.initialize();
 
     const wrapper = new TaskWrapper(runtimeTask, agentSettings);
     this.tasks.set(taskId, wrapper);
@@ -467,6 +477,119 @@ export class CoderAgentExecutor implements AgentExecutor {
     try {
       let agentTurnActive = true;
       logger.info(`[CoderAgentExecutor] Task ${taskId}: Processing user turn.`);
+
+      // Intercept plain text tool confirmations if the task is waiting for input
+      if (
+        currentTask.taskState === 'input-required' &&
+        currentTask.pendingToolConfirmationDetails.size > 0
+      ) {
+        const userTextPart = userMessage.parts.find(
+          (p) => p.kind === 'text',
+        ) as { kind: 'text'; text: string } | undefined;
+        if (userTextPart) {
+          const text = userTextPart.text.trim().toLowerCase();
+          const affirmativeResponses = [
+            'yes',
+            'y',
+            'approve',
+            'proceed',
+            'go ahead',
+            'do it',
+            'confirm',
+            'ok',
+          ];
+          const negativeResponses = [
+            'no',
+            'n',
+            'cancel',
+            'reject',
+            'stop',
+            'abort',
+          ];
+
+          let outcome: string | undefined;
+          if (affirmativeResponses.includes(text)) {
+            outcome = 'proceed_once';
+          } else if (negativeResponses.includes(text)) {
+            outcome = 'cancel';
+          }
+
+          if (outcome) {
+            // Get the first pending call ID (usually there is only one awaiting approval at a time)
+            const pendingCallId = Array.from(
+              currentTask.pendingToolConfirmationDetails.keys(),
+            )[0];
+            if (pendingCallId) {
+              logger.info(
+                `[CoderAgentExecutor] Intercepted plain text "${text}" as tool confirmation ${outcome} for callId ${pendingCallId}`,
+              );
+              userMessage.parts.push({
+                kind: 'data',
+                data: {
+                  callId: pendingCallId,
+                  outcome,
+                },
+              } as unknown as Part);
+
+              // Remove the text part so it doesn't get sent to the LLM as a prompt,
+              // which would cause hallucinations about unrelated tasks.
+              userMessage.parts = userMessage.parts.filter(
+                (p) => p.kind !== 'text',
+              );
+            }
+          }
+        }
+      } else if (
+        currentTask.taskState === 'working' &&
+        currentTask.getAllPendingToolCalls().size > 0
+      ) {
+        // Intercept reply to ask_user tool which is "executing" asynchronously
+        const executingCalls = Array.from(
+          currentTask.getAllPendingToolCalls().entries(),
+        ).filter(([_, status]) => status === 'executing');
+
+        if (executingCalls.length > 0) {
+          const userTextPart = userMessage.parts.find(
+            (p) => p.kind === 'text',
+          ) as { kind: 'text'; text: string } | undefined;
+
+          if (userTextPart) {
+            const text = userTextPart.text.trim();
+            for (const [callId, _] of executingCalls) {
+              const toolCall = currentTask.getToolCall(callId);
+              if (
+                toolCall &&
+                'tool' in toolCall &&
+                'invocation' in toolCall &&
+                toolCall.tool.name === 'ask_user'
+              ) {
+                // Determine correlationId from invocation
+                // The tool exposes it on the invocation instance
+                const invocation = toolCall.invocation as unknown as {
+                  correlationId?: string;
+                }; // Cast to access custom prop
+                if (invocation.correlationId) {
+                  logger.info(
+                    `[CoderAgentExecutor] Intercepted text as response to ask_user tool (${callId})`,
+                  );
+                  void currentTask.config.getMessageBus().publish({
+                    type: MessageBusType.ASK_USER_RESPONSE,
+                    correlationId: invocation.correlationId,
+                    answers: { '0': text }, // Currently mapping flat text to the first question
+                  });
+
+                  // Remove the text part so it doesn't get sent to the LLM as a prompt
+                  userMessage.parts = userMessage.parts.filter(
+                    (p) => p.kind !== 'text',
+                  );
+                  break; // Only answer the first ask_user
+                }
+              }
+            }
+          }
+        }
+      }
+
       let agentEvents = currentTask.acceptUserMessage(
         requestContext,
         abortSignal,

@@ -23,6 +23,7 @@ import {
   type ToolCallRequestInfo,
   type ServerGeminiErrorEvent,
   type ServerGeminiStreamEvent,
+  type ResumedSessionData,
   type ToolCallConfirmationDetails,
   type Config,
   type UserTierId,
@@ -89,6 +90,7 @@ export class Task {
     config: Config,
     eventBus?: ExecutionEventBus,
     autoExecute = false,
+    _resumedSessionData?: ResumedSessionData,
   ) {
     this.id = id;
     this.contextId = contextId;
@@ -115,8 +117,31 @@ export class Task {
     config: Config,
     eventBus?: ExecutionEventBus,
     autoExecute?: boolean,
+    resumedSessionData?: ResumedSessionData,
   ): Promise<Task> {
-    return new Task(id, contextId, config, eventBus, autoExecute);
+    const task = new Task(
+      id,
+      contextId,
+      config,
+      eventBus,
+      autoExecute,
+      resumedSessionData,
+    );
+    if (resumedSessionData) {
+      // Create inline map to standard `@google/genai` Content structure
+      const history = resumedSessionData.conversation.messages.map((m) => ({
+        role: m.type === 'gemini' ? 'model' : 'user',
+        parts: Array.isArray(m.content) ? m.content : [m.content],
+      }));
+      void task.geminiClient.resumeChat(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        history as any[], // Explicit cast to bypass strict @google/genai Content type matching
+        resumedSessionData,
+      );
+    } else {
+      void task.geminiClient.initialize();
+    }
+    return task;
   }
 
   // Note: `getAllMCPServerStatuses` retrieves the status of all MCP servers for the entire
@@ -151,6 +176,18 @@ export class Task {
       availableTools,
     };
     return metadata;
+  }
+
+  getAllPendingToolCalls(): Map<string, string> {
+    return this.pendingToolCalls;
+  }
+
+  getToolCall(callId: string): ToolCall | undefined {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (this.scheduler as any).toolCalls?.find(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (c: any) => c.request && c.request.callId === callId,
+    );
   }
 
   private _resetToolCompletionPromise(): void {

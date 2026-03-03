@@ -644,9 +644,16 @@ export class Config {
     const projectRoot = path.resolve(params.targetDir);
 
     // Create session-specific workspace directory
-    const sessionDir = path.join(projectRoot, '.workspace', params.sessionId);
+    const sessionDir = path.join(
+      os.homedir(),
+      '.actus',
+      'workspace',
+      params.sessionId,
+    );
     try {
       fs.mkdirSync(sessionDir, { recursive: true });
+      const skillsDir = path.join(os.homedir(), '.actus', 'skills');
+      fs.mkdirSync(skillsDir, { recursive: true });
     } catch (e) {
       // failed to create session directory, fallback to project root?
       // Or just let it fail? If we can't create it, we probably can't do much.
@@ -900,6 +907,7 @@ export class Config {
       const plansDir = this.storage.getProjectTempPlansDir();
       await fs.promises.mkdir(plansDir, { recursive: true });
       this.workspaceContext.addDirectory(plansDir);
+      this.workspaceContext.addDirectory(this.getChatsDir());
     }
 
     // Initialize centralized FileDiscoveryService
@@ -1664,6 +1672,38 @@ export class Config {
 
   getWorkingDir(): string {
     return this.cwd;
+  }
+
+  getChatsDir(): string {
+    // Determine the directory where chat logs (e.g. session-XXX.json) are stored.
+    // If the process is a server or an agent, use the workspace directory (targetDir)
+    // so the logs are readily accessible in `~/.actus/workspace/<sessionId>/chats`.
+    // Otherwise fallback to the normal project temp directory for CLI invocations.
+    const isSessionWorkspace = this.targetDir.includes(
+      path.join('.actus', 'workspace'),
+    );
+    const baseDir = isSessionWorkspace
+      ? this.targetDir
+      : this.storage.getProjectTempDir();
+    const chatsDir = path.join(baseDir, 'chats');
+
+    // Ensure the directory exists.
+    try {
+      if (!fs.existsSync(chatsDir)) {
+        fs.mkdirSync(chatsDir, { recursive: true });
+      }
+    } catch (e) {
+      if (
+        e instanceof Error &&
+        (e as NodeJS.ErrnoException).code === 'ENOSPC'
+      ) {
+        // Allow the app to function even if no space left on device
+      } else {
+        throw e;
+      }
+    }
+
+    return chatsDir;
   }
 
   getBugCommand(): BugCommandSettings | undefined {

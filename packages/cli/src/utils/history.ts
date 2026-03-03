@@ -6,6 +6,7 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import os from 'node:os';
 
 import { debugLogger } from '@google/gemini-actus-core';
 
@@ -24,14 +25,10 @@ export interface ChatSession {
 }
 
 export class HistoryManager {
-  private workspaceRoot: string;
-
-  constructor(workspaceRoot = process.cwd()) {
-    this.workspaceRoot = workspaceRoot;
-  }
+  constructor() {}
 
   private getSessionDir(id: string): string {
-    return path.join(this.workspaceRoot, '.workspace', id);
+    return path.join(os.homedir(), '.actus', 'workspace', id);
   }
 
   private getHistoryDetailsPath(id: string): string {
@@ -41,7 +38,7 @@ export class HistoryManager {
   async getHistory(): Promise<
     Array<{ id: string; title: string; lastModified: number }>
   > {
-    const workspaceDir = path.join(this.workspaceRoot, '.workspace');
+    const workspaceDir = path.join(os.homedir(), '.actus', 'workspace');
     try {
       const entries = await fs.readdir(workspaceDir, { withFileTypes: true });
       const sessions = await Promise.all(

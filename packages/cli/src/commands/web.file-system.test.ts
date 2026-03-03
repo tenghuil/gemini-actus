@@ -9,12 +9,16 @@ import type { Request, Response, NextFunction, Express } from 'express';
 import { setupFileSystemRoutes } from './web-routes.js';
 import path from 'node:path';
 
-const { mockReaddir, mockReadFile, mockStat, mockAccess } = vi.hoisted(() => ({
-  mockReaddir: vi.fn(),
-  mockReadFile: vi.fn(),
-  mockStat: vi.fn(),
-  mockAccess: vi.fn(),
-}));
+const mockHomeDir = '/tmp/test-home';
+
+const { mockReaddir, mockReadFile, mockStat, mockAccess, mockHomedir } =
+  vi.hoisted(() => ({
+    mockReaddir: vi.fn(),
+    mockReadFile: vi.fn(),
+    mockStat: vi.fn(),
+    mockAccess: vi.fn(),
+    mockHomedir: vi.fn(() => '/tmp/test-home'),
+  }));
 
 vi.mock('node:fs/promises', async () => ({
   default: {
@@ -28,6 +32,18 @@ vi.mock('node:fs/promises', async () => ({
   stat: mockStat,
   access: mockAccess,
 }));
+
+vi.mock('node:os', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:os')>();
+  return {
+    ...actual,
+    default: {
+      ...actual,
+      homedir: mockHomedir,
+    },
+    homedir: mockHomedir,
+  };
+});
 
 describe('FileSystem Routes', () => {
   let app: Express;
@@ -121,7 +137,12 @@ describe('FileSystem Routes', () => {
     const handler = handlers['GET /api/files/list'];
     await handler(mockReq, mockRes);
 
-    const expectedPath = path.join(process.cwd(), '.workspace', 'test-session');
+    const expectedPath = path.join(
+      mockHomeDir,
+      '.actus',
+      'workspace',
+      'test-session',
+    );
     expect(mockReaddir).toHaveBeenCalledWith(expectedPath, {
       withFileTypes: true,
     });
@@ -161,8 +182,9 @@ describe('FileSystem Routes', () => {
     await handler(mockReq, mockRes);
 
     const expectedPath = path.join(
-      process.cwd(),
-      '.workspace',
+      mockHomeDir,
+      '.actus',
+      'workspace',
       'test-session',
       'test.html',
     );
@@ -179,13 +201,13 @@ describe('FileSystem Routes', () => {
 
     mockAccess.mockImplementation(async (checkPath) => {
       // Check if it's the workspace access check
-      if (checkPath === path.join(process.cwd(), '.workspace', chatId)) {
+      if (checkPath === path.join(mockHomeDir, '.actus', 'workspace', chatId)) {
         return; // success
       }
       // Check if it's the file access check
       if (
         checkPath ===
-        path.join(process.cwd(), '.workspace', chatId, 'index.html')
+        path.join(mockHomeDir, '.actus', 'workspace', chatId, 'index.html')
       ) {
         return; // success
       }
@@ -198,8 +220,9 @@ describe('FileSystem Routes', () => {
     await handler(mockReq, mockRes, mockNext);
 
     const expectedPath = path.join(
-      process.cwd(),
-      '.workspace',
+      mockHomeDir,
+      '.actus',
+      'workspace',
       chatId,
       'index.html',
     );

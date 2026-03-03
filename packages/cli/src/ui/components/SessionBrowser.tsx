@@ -10,7 +10,6 @@ import { Box, Text } from 'ink';
 import { Colors } from '../colors.js';
 import { useTerminalSize } from '../hooks/useTerminalSize.js';
 import { useKeypress } from '../hooks/useKeypress.js';
-import path from 'node:path';
 import type { Config } from '@google/gemini-actus-core';
 import type { SessionInfo, TextMatch } from '../../utils/sessionUtils.js';
 import {
@@ -650,7 +649,7 @@ const useLoadSessions = (config: Config, state: SessionBrowserState) => {
   useEffect(() => {
     const loadSessions = async () => {
       try {
-        const chatsDir = path.join(config.storage.getProjectTempDir(), 'chats');
+        const chatsDir = config.getChatsDir();
         const sessionData = await getSessionFiles(
           chatsDir,
           config.getSessionId(),
@@ -673,10 +672,7 @@ const useLoadSessions = (config: Config, state: SessionBrowserState) => {
     const loadFullContent = async () => {
       if (isSearchMode && !hasLoadedFullContent) {
         try {
-          const chatsDir = path.join(
-            config.storage.getProjectTempDir(),
-            'chats',
-          );
+          const chatsDir = config.getChatsDir();
           const sessionData = await getSessionFiles(
             chatsDir,
             config.getSessionId(),

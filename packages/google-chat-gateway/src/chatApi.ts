@@ -9,7 +9,8 @@ import { logger } from './logger.js';
 
 export async function sendAsyncMessage(
   spaceName: string,
-  threadName: string,
+  threadName: string | undefined, // explicitly optional
+  threadKey: string | undefined,
   text: string,
 ): Promise<void> {
   try {
@@ -65,17 +66,26 @@ export async function sendAsyncMessage(
       auth: authClient,
     });
 
+    // @ts-expect-error messageReplyOption is a valid Google Chat REST parameter but might not be in this SDK version
     await chat.spaces.messages.create({
       parent: spaceName,
+      messageReplyOption:
+        threadName || threadKey
+          ? 'REPLY_MESSAGE_FALLBACK_TO_NEW_THREAD'
+          : undefined,
       requestBody: {
         text,
-        thread: {
-          name: threadName,
-        },
+        thread: threadName
+          ? { name: threadName }
+          : threadKey
+            ? { threadKey }
+            : undefined,
       },
     });
 
-    logger.info(`Successfully sent asynchronous message to ${threadName}`);
+    logger.info(
+      `Successfully sent asynchronous message to ${threadName || spaceName}`,
+    );
   } catch (error) {
     logger.error('Error sending message to Google Chat:', error);
     // Log the error stack to see if it's strictly credential parsing

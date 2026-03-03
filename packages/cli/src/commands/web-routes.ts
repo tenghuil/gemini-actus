@@ -6,43 +6,20 @@
 
 import type express from 'express';
 import path from 'node:path';
+import os from 'node:os';
 import { debugLogger } from '@google/gemini-actus-core';
 
 export async function setupFileSystemRoutes(app: express.Express) {
   const fs = await import('node:fs/promises');
 
   // Helper to find the real workspace root (handling monorepo structure)
-  const findWorkspaceRoot = async () => {
-    // Check cwd
-    const cwd = process.cwd();
-    const localWorkspace = path.join(cwd, '.workspace');
-    try {
-      await fs.access(localWorkspace);
-      return cwd;
-    } catch {
-      // ignore
-    }
-
-    // Check 2 levels up (repo root from packages/cli)
-    const repoRoot = path.resolve(cwd, '../..');
-    const repoWorkspace = path.join(repoRoot, '.workspace');
-    try {
-      await fs.access(repoWorkspace);
-      return repoRoot;
-    } catch {
-      // ignore
-    }
-
-    // Default to cwd if neither found
-    return cwd;
-  };
+  const findWorkspaceRoot = async () => process.cwd();
 
   const getWorkspacePath = async (chatId?: string) => {
-    const root = await findWorkspaceRoot();
     if (chatId) {
-      return path.join(root, '.workspace', chatId);
+      return path.join(os.homedir(), '.actus', 'workspace', chatId);
     }
-    return root;
+    return findWorkspaceRoot();
   };
 
   app.get('/api/files/list', async (req, res) => {
@@ -67,7 +44,8 @@ export async function setupFileSystemRoutes(app: express.Express) {
         'dist',
         '.next',
         '.DS_Store',
-        '.workspace',
+        '.actus',
+        'workspace',
         'history.json',
       ];
 
@@ -152,10 +130,10 @@ export async function setupFileSystemRoutes(app: express.Express) {
 
       debugLogger.log(`Preview request: ${req.path}`);
 
-      const workspaceRoot = await findWorkspaceRoot();
       const sessionDir = path.join(
-        workspaceRoot,
-        '.workspace',
+        os.homedir(),
+        '.actus',
+        'workspace',
         potentialChatId,
       );
 

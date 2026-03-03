@@ -54,6 +54,14 @@ export class Storage {
     return path.join(Storage.getGlobalGeminiDir(), 'skills');
   }
 
+  static getActusSkillsDir(): string {
+    const homeDir = homedir();
+    if (!homeDir) {
+      return path.join(os.tmpdir(), '.actus', 'skills');
+    }
+    return path.join(homeDir, '.actus', 'skills');
+  }
+
   static getGlobalMemoryFilePath(): string {
     return path.join(Storage.getGlobalGeminiDir(), 'memory.md');
   }

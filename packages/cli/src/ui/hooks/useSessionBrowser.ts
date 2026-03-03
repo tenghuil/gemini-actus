@@ -45,10 +45,7 @@ export const useSessionBrowser = (
     handleResumeSession: useCallback(
       async (session: SessionInfo) => {
         try {
-          const chatsDir = path.join(
-            config.storage.getProjectTempDir(),
-            'chats',
-          );
+          const chatsDir = config.getChatsDir();
 
           const fileName = session.fileName;
 

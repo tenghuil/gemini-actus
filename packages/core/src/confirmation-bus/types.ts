@@ -146,11 +146,13 @@ export interface AskUserRequest {
   type: MessageBusType.ASK_USER_REQUEST;
   questions: Question[];
   correlationId: string;
+  callId?: string;
 }
 
 export interface AskUserResponse {
   type: MessageBusType.ASK_USER_RESPONSE;
   correlationId: string;
+  callId?: string;
   answers: { [questionIndex: string]: string };
   /** When true, indicates the user cancelled the dialog without submitting answers */
   cancelled?: boolean;

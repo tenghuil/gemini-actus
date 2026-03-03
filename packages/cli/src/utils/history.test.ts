@@ -8,16 +8,19 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { HistoryManager } from './history.js';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import os from 'node:os';
 
 vi.mock('node:fs/promises');
+vi.mock('node:os');
 
 describe('HistoryManager', () => {
-  const mockWorkspaceRoot = '/tmp/test-workspace';
+  const mockHomeDir = '/tmp/test-home';
   let historyManager: HistoryManager;
 
   beforeEach(() => {
     vi.resetAllMocks();
-    historyManager = new HistoryManager(mockWorkspaceRoot);
+    vi.mocked(os.homedir).mockReturnValue(mockHomeDir);
+    historyManager = new HistoryManager();
     vi.mocked(fs.mkdir).mockResolvedValue(undefined);
     vi.mocked(fs.writeFile).mockResolvedValue(undefined);
     vi.mocked(fs.readFile).mockResolvedValue('');
@@ -30,11 +33,13 @@ describe('HistoryManager', () => {
     expect(chat.title).toBe('Test Chat');
     expect(chat.id).toBeDefined();
     expect(fs.mkdir).toHaveBeenCalledWith(
-      expect.stringContaining(path.join('.workspace', chat.id)),
+      expect.stringContaining(path.join('.actus', 'workspace', chat.id)),
       { recursive: true },
     );
     expect(fs.writeFile).toHaveBeenCalledWith(
-      expect.stringContaining(path.join('.workspace', chat.id, 'history.json')),
+      expect.stringContaining(
+        path.join('.actus', 'workspace', chat.id, 'history.json'),
+      ),
       expect.any(String),
       'utf-8',
     );
@@ -49,11 +54,11 @@ describe('HistoryManager', () => {
     };
     await historyManager.saveChat(chat);
     expect(fs.mkdir).toHaveBeenCalledWith(
-      path.join(mockWorkspaceRoot, '.workspace', 'test-id'),
+      path.join(mockHomeDir, '.actus', 'workspace', 'test-id'),
       { recursive: true },
     );
     expect(fs.writeFile).toHaveBeenCalledWith(
-      path.join(mockWorkspaceRoot, '.workspace', 'test-id', 'history.json'),
+      path.join(mockHomeDir, '.actus', 'workspace', 'test-id', 'history.json'),
       JSON.stringify(chat, null, 2),
       'utf-8',
     );
@@ -71,7 +76,7 @@ describe('HistoryManager', () => {
     const result = await historyManager.getChat('test-id');
     expect(result).toEqual(chat);
     expect(fs.readFile).toHaveBeenCalledWith(
-      path.join(mockWorkspaceRoot, '.workspace', 'test-id', 'history.json'),
+      path.join(mockHomeDir, '.actus', 'workspace', 'test-id', 'history.json'),
       'utf-8',
     );
   });
@@ -106,7 +111,7 @@ describe('HistoryManager', () => {
   it('should delete a chat', async () => {
     await historyManager.deleteChat('test-id');
     expect(fs.rm).toHaveBeenCalledWith(
-      path.join(mockWorkspaceRoot, '.workspace', 'test-id'),
+      path.join(mockHomeDir, '.actus', 'workspace', 'test-id'),
       { recursive: true, force: true },
     );
   });

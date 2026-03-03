@@ -165,6 +165,8 @@ export class AskUserInvocation extends BaseToolInvocation<
   AskUserParams,
   ToolResult
 > {
+  correlationId: string | undefined;
+
   override async shouldConfirmExecute(
     _abortSignal: AbortSignal,
   ): Promise<ToolCallConfirmationDetails | false> {
@@ -177,13 +179,22 @@ export class AskUserInvocation extends BaseToolInvocation<
 
   async execute(signal: AbortSignal): Promise<ToolResult> {
     const correlationId = randomUUID();
+    this.correlationId = correlationId;
 
     const request: AskUserRequest = {
       type: MessageBusType.ASK_USER_REQUEST,
-      questions: this.params.questions.map((q) => ({
-        ...q,
-        type: q.type ?? QuestionType.CHOICE,
-      })),
+      questions: this.params.questions.map((q: unknown) => {
+        const question = q as {
+          type?: QuestionType;
+          question: string;
+          header?: string;
+        };
+        return {
+          ...question,
+          type: question.type ?? QuestionType.CHOICE,
+          header: question.header ?? 'Please answer:',
+        };
+      }),
       correlationId,
     };
 

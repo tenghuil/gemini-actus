@@ -154,17 +154,15 @@ export class ChatRecordingService {
         this.cachedLastConvData = null;
       } else {
         // Create new session
-        const chatsDir = path.join(
-          this.config.storage.getProjectTempDir(),
-          'chats',
-        );
+        const chatsDir = this.config.getChatsDir();
         fs.mkdirSync(chatsDir, { recursive: true });
 
         const timestamp = new Date()
           .toISOString()
           .slice(0, 16)
           .replace(/:/g, '-');
-        const filename = `${SESSION_FILE_PREFIX}${timestamp}-${this.sessionId.slice(
+        const safeSessionId = this.sessionId.replace(/[^a-zA-Z0-9-]/g, '_');
+        const filename = `${SESSION_FILE_PREFIX}${timestamp}-${safeSessionId.slice(
           0,
           8,
         )}.json`;
@@ -532,10 +530,7 @@ export class ChatRecordingService {
    */
   deleteSession(sessionId: string): void {
     try {
-      const chatsDir = path.join(
-        this.config.storage.getProjectTempDir(),
-        'chats',
-      );
+      const chatsDir = this.config.getChatsDir();
       const sessionPath = path.join(chatsDir, `${sessionId}.json`);
       fs.unlinkSync(sessionPath);
     } catch (error) {

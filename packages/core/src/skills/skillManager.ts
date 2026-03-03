@@ -64,6 +64,10 @@ export class SkillManager {
     const userSkills = await loadSkillsFromDir(Storage.getUserSkillsDir());
     this.addSkillsWithPrecedence(userSkills);
 
+    // 3.5. Actus skills
+    const actusSkills = await loadSkillsFromDir(Storage.getActusSkillsDir());
+    this.addSkillsWithPrecedence(actusSkills);
+
     // 4. Workspace skills (highest precedence)
     const projectSkills = await loadSkillsFromDir(
       storage.getProjectSkillsDir(),

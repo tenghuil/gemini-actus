@@ -596,24 +596,46 @@ describe('Server Config (config.ts)', () => {
     // Verify other getters if needed
   });
 
-  it('Config constructor should create session-based workspace', () => {
-    const config = new Config(baseParams);
-    const resolvedTargetDir = path.resolve(TARGET_DIR);
-    const expectedSessionDir = path.join(
-      resolvedTargetDir,
-      '.workspace',
-      SESSION_ID,
-    );
+  it('Config constructor should create session-based workspace in home directory', async () => {
+    const mockHomedir = '/mock/home/dir';
+    const os = await import('node:os');
+    const originalHomedir = os.homedir;
 
-    expect(config.getTargetDir()).toBe(expectedSessionDir);
-    expect(fs.mkdirSync).toHaveBeenCalledWith(expectedSessionDir, {
-      recursive: true,
+    Object.defineProperty(os, 'homedir', {
+      value: () => mockHomedir,
+      configurable: true,
     });
 
-    // Check workspace context includes both session dir and project root
-    const directories = config.getWorkspaceContext().getDirectories();
-    expect(directories).toContain(expectedSessionDir);
-    expect(directories).toContain(resolvedTargetDir);
+    try {
+      const config = new Config(baseParams);
+      const resolvedTargetDir = path.resolve(TARGET_DIR);
+      const expectedSessionDir = path.join(
+        mockHomedir,
+        '.actus',
+        'workspace',
+        SESSION_ID,
+      );
+
+      expect(config.getTargetDir()).toBe(expectedSessionDir);
+      expect(fs.mkdirSync).toHaveBeenCalledWith(expectedSessionDir, {
+        recursive: true,
+      });
+
+      const expectedSkillsDir = path.join(mockHomedir, '.actus', 'skills');
+      expect(fs.mkdirSync).toHaveBeenCalledWith(expectedSkillsDir, {
+        recursive: true,
+      });
+
+      // Check workspace context includes both session dir and project root
+      const directories = config.getWorkspaceContext().getDirectories();
+      expect(directories).toContain(expectedSessionDir);
+      expect(directories).toContain(resolvedTargetDir);
+    } finally {
+      Object.defineProperty(os, 'homedir', {
+        value: originalHomedir,
+        configurable: true,
+      });
+    }
   });
 
   it('Config constructor should default userMemory to empty string if not provided', () => {

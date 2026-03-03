@@ -16,6 +16,12 @@ import {
 } from '@a2a-js/sdk/server';
 import { A2AExpressApp } from '@a2a-js/sdk/server/express'; // Import server components
 import { v4 as uuidv4 } from 'uuid';
+import * as fs from 'node:fs/promises';
+import path from 'node:path';
+import type {
+  ConversationRecord,
+  ResumedSessionData,
+} from '@google/gemini-actus-core';
 import { logger } from '../utils/logger.js';
 import type { AgentSettings } from '../types.js';
 import { GCSTaskStore, NoOpTaskStore } from '../persistence/gcs.js';
@@ -205,16 +211,71 @@ export async function createApp() {
 
     expressApp.post('/tasks', async (req, res) => {
       try {
-        const taskId = uuidv4();
+        const taskId = req.body.taskId || uuidv4();
         const agentSettings = req.body.agentSettings as
           | AgentSettings
           | undefined;
-        const contextId = req.body.contextId || uuidv4();
-        const wrapper = await agentExecutor.createTask(
-          taskId,
-          contextId,
-          agentSettings,
-        );
+        const contextId = req.body.contextId || taskId;
+        let wrapper = agentExecutor.getTask(taskId);
+        if (!wrapper) {
+          try {
+            // Check if it exists in store but not executor
+            const sdkTask = await taskStoreForExecutor.load(taskId);
+            if (sdkTask) {
+              wrapper = await agentExecutor.reconstruct(sdkTask);
+            }
+          } catch (_e) {
+            // Ignore load errors
+          }
+        }
+        if (!wrapper) {
+          let resumedSessionData: ResumedSessionData | undefined;
+          try {
+            const chatsDir = config.getChatsDir();
+            const files = await fs.readdir(chatsDir);
+            const matchingFiles = files
+              .filter(
+                (f) =>
+                  f.startsWith('session-') &&
+                  f.endsWith('.json') &&
+                  f.includes(taskId.replace(/[^a-zA-Z0-9-]/g, '_').slice(0, 8)),
+              )
+              .sort(); // Oldest first
+
+            if (matchingFiles.length > 0) {
+              const latestFile = matchingFiles[matchingFiles.length - 1];
+              const filePath = path.join(chatsDir, latestFile);
+              const fileContent = await fs.readFile(filePath, 'utf8');
+              const conversation = JSON.parse(
+                fileContent,
+              ) as ConversationRecord;
+
+              if (conversation.sessionId === taskId) {
+                resumedSessionData = {
+                  conversation,
+                  filePath,
+                };
+                logger.info(
+                  `Found existing session history for task ${taskId}: ${filePath}`,
+                );
+              }
+            }
+          } catch (e) {
+            // Ignore if directory doesn't exist or file can't be read
+            logger.debug(
+              `Could not load session history for task ${taskId}: ${e}`,
+            );
+          }
+
+          wrapper = await agentExecutor.createTask(
+            taskId,
+            contextId,
+            agentSettings,
+            undefined, // eventBus
+            resumedSessionData,
+          );
+          await taskStoreForExecutor.save(wrapper.toSDKTask());
+        }
         await taskStoreForExecutor.save(wrapper.toSDKTask());
         res.status(201).json(wrapper.id);
       } catch (error) {
