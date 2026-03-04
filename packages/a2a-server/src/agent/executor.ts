@@ -22,6 +22,7 @@ import {
   SimpleExtensionLoader,
   MessageBusType,
 } from '@google/gemini-actus-core';
+import type { CronService } from '@google/gemini-actus-core';
 import { v4 as uuidv4 } from 'uuid';
 
 import { logger } from '../utils/logger.js';
@@ -90,7 +91,7 @@ export class CoderAgentExecutor implements AgentExecutor {
   // Track tasks with an active execution loop.
   private executingTasks = new Set<string>();
 
-  constructor(private taskStore?: TaskStore) {}
+  constructor(private taskStore?: TaskStore, private cronService?: CronService) {}
 
   private async getConfig(
     agentSettings: AgentSettings,
@@ -100,11 +101,15 @@ export class CoderAgentExecutor implements AgentExecutor {
     loadEnvironment(); // Will override any global env with workspace envs
     const settings = loadSettings(workspaceRoot);
     const extensions = loadExtensions(workspaceRoot);
-    return loadConfig(
+    const config = await loadConfig(
       settings,
       new SimpleExtensionLoader(extensions),
       contextId,
     );
+    if (this.cronService) {
+      config.setCronService(this.cronService);
+    }
+    return config;
   }
 
   /**

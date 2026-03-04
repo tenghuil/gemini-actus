@@ -7,6 +7,7 @@
 import { askAgent } from './agentClient.js';
 import { sendAsyncMessage } from './chatApi.js';
 import { logger } from './logger.js';
+import * as fs from 'fs';
 
 interface ChatEvent {
   chat?: {
@@ -33,6 +34,8 @@ interface ChatEvent {
 export async function handleChatEvent(
   event: ChatEvent,
 ): Promise<{ text?: string } | void> {
+  fs.writeFileSync('/tmp/google_chat_event.json', JSON.stringify(event, null, 2));
+
   // Handler for the new Google Chat API interaction structure
   if (event.chat && event.chat.messagePayload) {
     const messagePayload = event.chat.messagePayload;
@@ -61,7 +64,7 @@ export async function handleChatEvent(
         let sessionId = spaceId;
         // The API sends threadName for DMs sometimes but we shouldn't consider it a threaded session.
         if (spaceType !== 'DIRECT_MESSAGE' && threadId) {
-          sessionId = `${spaceId}_${threadId}`;
+          sessionId = `${spaceId}::${threadId}`;
         }
 
         // Send the prompt to the core agent and then reply asynchronously
@@ -112,7 +115,7 @@ export async function handleChatEvent(
       let sessionId = spaceId;
       // The API sends threadName for DMs sometimes but we shouldn't consider it a threaded session.
       if (spaceType !== 'DIRECT_MESSAGE' && threadId) {
-        sessionId = `${spaceId}_${threadId}`;
+        sessionId = `${spaceId}::${threadId}`;
       }
 
       // Send the prompt to the core agent and then reply asynchronously

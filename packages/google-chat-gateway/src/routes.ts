@@ -13,6 +13,7 @@ import {
 import { verifyGoogleChatWebhook } from './auth.js';
 import { handleChatEvent } from './eventHandler.js';
 import { logger } from './logger.js';
+import { sendAsyncMessage } from './chatApi.js';
 
 const router = Router();
 
@@ -22,6 +23,30 @@ const authMiddleware =
   process.env['NODE_ENV'] === 'development'
     ? (req: Request, res: Response, next: NextFunction) => next()
     : verifyGoogleChatWebhook;
+
+router.post('/internal/push', async (req, res) => {
+  const { sessionId, text } = req.body;
+  if (!sessionId || !text) {
+    res.status(400).send({ error: 'Missing sessionId or text' });
+    return;
+  }
+  
+  try {
+    const spaceId = sessionId.split('::')[0];
+    const threadId = sessionId.split('::')[1];
+    const spaceName = `spaces/${spaceId}`;
+    let threadName = undefined;
+    if (threadId) {
+      threadName = `spaces/${spaceId}/threads/${threadId}`;
+    }
+    
+    await sendAsyncMessage(spaceName, threadName, undefined, text);
+    res.status(200).send({ success: true });
+  } catch (err) {
+    logger.error('Error in internal push:', err);
+    res.status(500).send({ error: 'Failed to send message' });
+  }
+});
 
 router.post('/webhook', authMiddleware, async (req, res) => {
   const event = req.body;

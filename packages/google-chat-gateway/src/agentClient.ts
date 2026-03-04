@@ -83,6 +83,7 @@ export async function askAgent(
     });
 
     let fullResponse = '';
+    let pendingActionText = '';
 
     for await (const chunk of stream) {
       logger.info('Stream Chunk:', JSON.stringify(chunk, null, 2));
@@ -96,58 +97,69 @@ export async function askAgent(
               typeof part.data === 'object'
             ) {
               const data = part.data as Record<string, unknown>;
-              let toolName = 'a tool';
-              let argsStr = '';
 
               // 1. Check for standard tool awaiting approval
-              if (
-                data['status'] === 'awaiting_approval' &&
-                data['request'] &&
-                data['tool']
-              ) {
-                const tool = data['tool'] as Record<string, string>;
-                const request = data['request'] as Record<string, unknown>;
-                toolName = tool['displayName'] || tool['name'] || toolName;
-                if (request['args']) {
-                  argsStr = JSON.stringify(request['args'], null, 2);
-                } else if (request['arguments']) {
-                  argsStr = JSON.stringify(request['arguments'], null, 2);
+              if (data['status'] === 'awaiting_approval') {
+                let toolName = 'a tool';
+                let argsStr = '';
+                if (data['request'] && data['tool']) {
+                  const tool = data['tool'] as Record<string, string>;
+                  const request = data['request'] as Record<string, unknown>;
+                  toolName = tool['displayName'] || tool['name'] || toolName;
+                  if (request['args']) {
+                    argsStr = JSON.stringify(request['args'], null, 2);
+                  } else if (request['arguments']) {
+                    argsStr = JSON.stringify(request['arguments'], null, 2);
+                  }
                 }
-                fullResponse += `\n\n**Action Required:**\nI need your permission to use **${toolName}**.\n\`\`\`\n${argsStr}\n\`\`\`\n\nPlease reply with your approval (e.g., "approve") or rejection.`;
+                // Store but do not append yet
+                pendingActionText = `\n\n**Action Required:**\nI need your permission to use **${toolName}**.\n\`\`\`\n${argsStr}\n\`\`\`\n\nPlease reply with your approval (e.g., "approve") or rejection.`;
               }
-              // 2. Check for ask_user tool executing (which requires user input)
+              // If it transitions to executing or approved, discard the prompt
               else if (
-                data['status'] === 'executing' &&
-                data['request'] &&
-                data['tool'] &&
-                (data['tool'] as Record<string, string>)['name'] === 'ask_user'
+                data['status'] === 'executing' || 
+                data['status'] === 'approved' || 
+                data['status'] === 'completed'
               ) {
-                const request = data['request'] as Record<string, unknown>;
-                // Determine whether it has 'args' or 'arguments'
-                const requestArgs = request['args'] || request['arguments'];
-                if (requestArgs) {
-                  const args = requestArgs as { questions?: unknown[] };
-                  if (args.questions && args.questions.length > 0) {
-                    for (const qRaw of args.questions) {
-                      const q = qRaw as {
-                        type?: string;
-                        question?: string;
-                        options?: Array<{ label: string; description: string }>;
-                      };
-                      fullResponse += `\n\n**Question:**\n${q.question}\n`;
-                      if (q.type === 'choice' && q.options) {
-                        for (let i = 0; i < q.options.length; i++) {
-                          const opt = q.options[i];
-                          fullResponse += `${i + 1}. **${opt.label}** - ${opt.description}\n`;
+                // If it's the ask_user tool, we DO want to prompt the user
+                if (
+                  data['status'] === 'executing' &&
+                  data['request'] &&
+                  data['tool'] &&
+                  (data['tool'] as Record<string, string>)['name'] === 'ask_user'
+                ) {
+                  const request = data['request'] as Record<string, unknown>;
+                  const requestArgs = request['args'] || request['arguments'];
+                  if (requestArgs) {
+                    const args = requestArgs as { questions?: unknown[] };
+                    if (args.questions && args.questions.length > 0) {
+                      let askText = '';
+                      for (const qRaw of args.questions) {
+                        const q = qRaw as {
+                          type?: string;
+                          question?: string;
+                          options?: Array<{ label: string; description: string }>;
+                        };
+                        askText += `\n\n**Question:**\n${q.question}\n`;
+                        if (q.type === 'choice' && q.options) {
+                          for (let i = 0; i < q.options.length; i++) {
+                            const opt = q.options[i];
+                            askText += `${i + 1}. **${opt.label}** - ${opt.description}\n`;
+                          }
+                        } else if (q.type === 'yesno') {
+                          askText += `\n*(Please answer yes or no)*\n`;
+                        } else {
+                          askText += `\n*(Please type your answer)*\n`;
                         }
-                      } else if (q.type === 'yesno') {
-                        fullResponse += `\n*(Please answer yes or no)*\n`;
-                      } else {
-                        fullResponse += `\n*(Please type your answer)*\n`;
                       }
+                      pendingActionText = askText;
+                      continue; 
                     }
                   }
                 }
+                
+                // Clear any leftover generic permission prompt
+                pendingActionText = '';
               }
             } else if (part.kind === 'text') {
               fullResponse += part.text;
@@ -155,6 +167,10 @@ export async function askAgent(
           }
         }
       }
+    }
+
+    if (pendingActionText) {
+      fullResponse += pendingActionText;
     }
 
     return {

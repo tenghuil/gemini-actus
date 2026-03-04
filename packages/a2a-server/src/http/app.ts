@@ -3,8 +3,8 @@
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-
 import express from 'express';
+import { z } from 'zod';
 
 import type { AgentCard, Message } from '@a2a-js/sdk';
 import type { TaskStore } from '@a2a-js/sdk/server';
@@ -34,6 +34,7 @@ import { commandRegistry } from '../commands/command-registry.js';
 import { debugLogger, SimpleExtensionLoader } from '@google/gemini-actus-core';
 import type { Command, CommandArgument } from '../commands/types.js';
 import { GitService } from '@google/gemini-actus-core';
+import { AgentRegistry, CronService, LocalAgentExecutor, type LocalAgentDefinition, ApprovalMode, PolicyDecision } from '@google/gemini-actus-core';
 
 type CommandResponse = {
   name: string;
@@ -173,6 +174,125 @@ export async function createApp() {
       await git.initialize();
     }
 
+    const agentRegistry = new AgentRegistry(config);
+    await agentRegistry.initialize();
+
+    const cronStorePath = path.join(config.getTargetDir(), 'cron-store.json');
+    const cronService = new CronService(cronStorePath, {
+      onAgentTurn: async (message: string, timeoutSeconds?: number, contextId?: string) => {
+        logger.info(`[CRON] Firing agent turn with message: "${message}", contextId: ${contextId}`);
+        const cronAgentDef: LocalAgentDefinition = {
+          name: 'cron-agent',
+          description: 'A dedicated internal agent for executing background cron jobs autonomously.',
+          kind: 'local',
+          inputConfig: {
+            inputSchema: {
+              type: 'object',
+              properties: {
+                request: { type: 'string', description: 'The scheduled task instruction.' },
+              },
+              required: ['request'],
+            },
+          },
+          outputConfig: {
+            outputName: 'result',
+            description: 'The execution result message.',
+            schema: z.unknown(),
+          },
+          modelConfig: { model: 'inherit' },
+          runConfig: { maxTimeMinutes: 5, maxTurns: 10 },
+          get toolConfig() {
+            const tools = config.getToolRegistry().getAllToolNames().filter(t => t !== 'complete_task');
+            return { tools };
+          },
+          promptConfig: {
+            systemPrompt: 'You are an autonomous background agent running a scheduled cron job. Execute the user request immediately using your tools. Do not ask for permissions or confirmations from the user. You are fully authorized to proceed. Once done, return a concise summary of the result.',
+            query: '${request}'
+          }
+        };
+
+        config.modelConfigService.registerRuntimeModelConfig(
+          `${cronAgentDef.name}-config`,
+          {
+            modelConfig: {
+              model: config.getModel(),
+            },
+          }
+        );
+
+        const cronConfig = new Proxy(config, {
+          get(target, prop, receiver) {
+            if (prop === 'getApprovalMode') {
+              return () => ApprovalMode.YOLO;
+            }
+            if (prop === 'getPolicyEngine') {
+              return () => {
+                const engine = target.getPolicyEngine();
+                return new Proxy(engine, {
+                  get(engineTarget, engineProp) {
+                    if (engineProp === 'check') {
+                      return async () => ({ decision: PolicyDecision.ALLOW, rule: undefined });
+                    }
+                    if (engineProp === 'getApprovalMode') {
+                      return () => ApprovalMode.YOLO;
+                    }
+                    const value = Reflect.get(engineTarget, engineProp);
+                    return typeof value === 'function' ? value.bind(engineTarget) : value;
+                  }
+                });
+              };
+            }
+            return Reflect.get(target, prop, receiver);
+          }
+        });
+
+        const executor = await LocalAgentExecutor.create(
+          cronAgentDef,
+          cronConfig,
+          (activity) => {
+            if (activity.type === 'THOUGHT_CHUNK' || activity.type === 'TOOL_CALL_START' || activity.type === 'TOOL_CALL_END') {
+               logger.debug(`[CRON Agent]: ${JSON.stringify(activity)}`);
+            }
+          }
+        );
+
+        const controller = new AbortController();
+        if (timeoutSeconds) {
+          setTimeout(() => controller.abort(), timeoutSeconds * 1000);
+        }
+
+        try {
+          const result = await executor.run({ request: message }, controller.signal);
+          logger.info(`[CRON] Agent finished. Reason: ${result.terminate_reason}`);
+          
+          if (contextId && result.result && typeof result.result === 'string' && result.result.trim().length > 0) {
+             const port = process.env['PORT'] || 3000;
+             try {
+                const fetchResult = await fetch(`http://localhost:${port}/google-chat/internal/push`, {
+                   method: 'POST',
+                   headers: { 'Content-Type': 'application/json' },
+                   body: JSON.stringify({ sessionId: contextId, text: result.result })
+                });
+                if (!fetchResult.ok) {
+                   logger.error(`[CRON] Failed to forward message to Google Chat Gateway: ${fetchResult.statusText}`);
+                } else {
+                   logger.info(`[CRON] Successfully forwarded message to session ${contextId}`);
+                }
+             } catch (e) {
+                logger.error(`[CRON] Error notifying Gateway:`, e);
+             }
+          }
+        } catch (e) {
+          logger.error(`[CRON] Agent failed:`, e);
+        }
+      }
+    });
+
+    config.setCronService(cronService);
+
+    // We will start cronService after express setup
+
+
     // loadEnvironment() is called within getConfig now
     const bucketName = process.env['GCS_BUCKET_NAME'];
     let taskStoreForExecutor: TaskStore;
@@ -190,7 +310,7 @@ export async function createApp() {
       taskStoreForHandler = inMemoryTaskStore;
     }
 
-    const agentExecutor = new CoderAgentExecutor(taskStoreForExecutor);
+    const agentExecutor = new CoderAgentExecutor(taskStoreForExecutor, cronService);
 
     const context = { config, git, agentExecutor };
 
@@ -377,6 +497,14 @@ export async function createApp() {
       }
       res.json({ metadata: await wrapper.task.getMetadata() });
     });
+
+    // Start cron service
+    await cronService.start();
+    logger.info('[CRON] CronService started successfully.');
+
+    // Attach cronService to app context or similar if needed for shutdown
+    (expressApp as any).cronService = cronService;
+
     return expressApp;
   } catch (error) {
     logger.error('[CoreAgent] Error during startup:', error);
@@ -407,6 +535,26 @@ export async function main() {
         `[CoreAgent] Agent Card: http://localhost:${actualPort}/.well-known/agent-card.json`,
       );
       logger.info('[CoreAgent] Press Ctrl+C to stop the server');
+
+      const shutdown = () => {
+        logger.info('[CoreAgent] Shutting down server...');
+        if ((expressApp as any).cronService) {
+          (expressApp as any).cronService.stop();
+        }
+        server.close(() => {
+          logger.info('[CoreAgent] Server closed cleanly.');
+          process.exit(0);
+        });
+        
+        // Force exit if connections linger
+        setTimeout(() => {
+          logger.warn('[CoreAgent] Forcefully exiting process due to hanging connections.');
+          process.exit(0);
+        }, 1000).unref();
+      };
+
+      process.on('SIGINT', shutdown);
+      process.on('SIGTERM', shutdown);
     });
   } catch (error) {
     logger.error('[CoreAgent] Error during startup:', error);

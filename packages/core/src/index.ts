@@ -134,6 +134,7 @@ export * from './prompts/mcp-prompts.js';
 export * from './agents/types.js';
 export * from './agents/agentLoader.js';
 export * from './agents/local-executor.js';
+export * from './agents/registry.js';
 
 // Export specific tool logic
 export * from './tools/read-file.js';
@@ -152,6 +153,7 @@ export * from './tools/mcp-client.js';
 export * from './tools/mcp-tool.js';
 export * from './tools/write-todos.js';
 export * from './tools/preview-tool.js';
+export * from './tools/cron-tool.js';
 
 // MCP OAuth
 export { MCPOAuthProvider } from './mcp/oauth-provider.js';
@@ -186,3 +188,6 @@ export * from './agents/types.js';
 export * from './utils/stdio.js';
 export * from './browser/extension-bridge.js';
 export * from './utils/terminal.js';
+
+// Export cron
+export * from './cron/index.js';

@@ -62,6 +62,7 @@ import { ideContextStore } from '../ide/ideContext.js';
 import { WriteTodosTool } from '../tools/write-todos.js';
 import { BrowserTool } from '../tools/browser-tool.js';
 import { PreviewTool } from '../tools/preview-tool.js';
+import { CronTool } from '../tools/cron-tool.js';
 import { CompleteTaskTool } from '../tools/complete-task.js';
 import { WebdevInitProjectTool } from '../tools/webdev-init-project.js';
 import { WebdevRequestSecretsTool } from '../tools/webdev-request-secrets.js';
@@ -118,6 +119,7 @@ import { debugLogger } from '../utils/debugLogger.js';
 import { SkillManager, type SkillDefinition } from '../skills/skillManager.js';
 import { startupProfiler } from '../telemetry/startupProfiler.js';
 import type { AgentDefinition } from '../agents/types.js';
+import type { CronService } from '../cron/service.js';
 import {
   logApprovalModeSwitch,
   logApprovalModeDuration,
@@ -633,6 +635,7 @@ export class Config {
   private remoteAdminSettings: FetchAdminControlsResponse | undefined;
   private latestApiRequest: GenerateContentParameters | undefined;
   private lastModeSwitchTime: number = Date.now();
+  private cronService?: CronService;
 
   constructor(params: ConfigParameters) {
     this.sessionId = params.sessionId;
@@ -2212,6 +2215,7 @@ export class Config {
     registerCoreTool(WebdevRequestSecretsTool);
     registerCoreTool(WebdevServeTool, this);
     registerCoreTool(PreviewTool);
+    registerCoreTool(CronTool, this);
 
     // Register Subagents as Tools
     this.registerSubAgentTools(registry);
@@ -2377,6 +2381,15 @@ export class Config {
     if (this.mcpClientManager) {
       await this.mcpClientManager.stop();
     }
+  }
+
+  // Cron integration
+  setCronService(cronService: CronService) {
+    this.cronService = cronService;
+  }
+
+  getCronService(): CronService | undefined {
+    return this.cronService;
   }
 }
 // Export model constants for use in CLI

@@ -70,7 +70,7 @@ export async function sendAsyncMessage(
     await chat.spaces.messages.create({
       parent: spaceName,
       messageReplyOption:
-        threadName || threadKey
+        (threadName || threadKey)
           ? 'REPLY_MESSAGE_FALLBACK_TO_NEW_THREAD'
           : undefined,
       requestBody: {
