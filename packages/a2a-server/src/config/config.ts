@@ -24,6 +24,8 @@ import {
   PREVIEW_GEMINI_MODEL,
   homedir,
   GitService,
+  createPolicyEngineConfig as createCorePolicyEngineConfig,
+  type PolicySettings,
 } from '@google/gemini-actus-core';
 
 import { logger } from '../utils/logger.js';
@@ -124,6 +126,19 @@ export async function loadConfig(
   configParams.userMemory = memoryContent;
   configParams.geminiMdFileCount = fileCount;
   configParams.geminiMdFilePaths = filePaths;
+  const policySettings: PolicySettings = {
+    mcpServers: settings.mcpServers,
+    tools: {
+      exclude: settings.excludeTools,
+    },
+  };
+
+  const policyEngineConfig = await createCorePolicyEngineConfig(
+    policySettings,
+    configParams.approvalMode!,
+  );
+  configParams.policyEngineConfig = policyEngineConfig;
+
   const config = new Config({
     ...configParams,
   });
